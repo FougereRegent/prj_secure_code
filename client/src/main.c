@@ -16,6 +16,7 @@ typedef struct in_addr IN_ADDR;
 
 static int send_message(const char *addr_ip, const int port, const char *format, const size_t taille_msg);
 static char* convert_byte_to_char(const uint8_t* array_bytes, const size_t size);
+static void init_cap();
 
 
 
@@ -24,7 +25,7 @@ int main(int argc, char **argv)
     char addr_ip[LENGHT_ADDR_IP];
 
     int port = 0;
-
+    init_cap();
     if(argc > 3)
     {
         const size_t size_string_addr_ip = strlen(argv[1]) <= LENGHT_ADDR_IP ? strlen(argv[1]) : LENGHT_ADDR_IP;
@@ -156,4 +157,25 @@ static char* convert_byte_to_char(const uint8_t* array_bytes, const size_t size)
         string[index] = array_bytes[index];
     }
     return string;
+}
+
+static void init_cap()
+{
+    cap_t cap = cap_get_proc();
+    if(cap_clear_flag(cap, CAP_PERMITTED) == -1)
+    {
+        cap_free(cap);
+        exit(1);
+    }
+    if(cap_clear_flag(cap, CAP_EFFECTIVE) == -1)
+    {
+        cap_free(cap);
+        exit(1);
+    }
+    if(cap_set_proc(cap) == -1)
+    {
+        printf("The capabilities can't set");
+        exit(1);
+    }
+    cap_free(cap);
 }

@@ -7,7 +7,7 @@
 #include "server.h"
 #include "treatment_time.h"
 
-void init_cap();
+static void init_cap();
 
 int main(int argc, char **argv)
 {
@@ -21,7 +21,7 @@ int main(int argc, char **argv)
     return EXIT_SUCCESS;
 }
 
-void init_cap()
+static void init_cap()
 {
     cap_t cap = cap_get_proc();
     if(cap_clear_flag(cap, CAP_PERMITTED) == -1)
