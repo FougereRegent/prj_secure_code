@@ -30,6 +30,7 @@ void loop_command()
             perror("Erreur de la fonction");
             exit(1);
         }
+        set_time("17/11/2001 10:10:10", 1);
         fflush(stdin);
 
     }
