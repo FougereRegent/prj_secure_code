@@ -90,7 +90,7 @@ static int regex_match(const char *command, const int flag) {
             result = regcomp(&regex, "^time\n", 0);
             break;
         case FLAG_SET_TIME:
-            result = regcomp(&regex, "^set ([0-1][0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])\n?$", REG_EXTENDED);
+            result = regcomp(&regex, "^set ([0-2][0-9]|3[0-1])/(0[1-9]|1[0-2])/([1-2][0-9][0-9][0-9]) ([0-1][0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])\n?$", REG_EXTENDED);
             break;
         case FLAG_QUIT_APP:
             result = regcomp(&regex, "^quit\n?$", REG_EXTENDED);

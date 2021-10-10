@@ -4,15 +4,18 @@
 #include <stdlib.h>
 #include <time.h>
 #include <sys/time.h>
+#include<sys/capability.h>
 #include <string.h>
 #include <errno.h>
 
 int set_time(const char *format_time);
 int check_format_time(const char* format_time);
+void init_cap();
 
 
 int main(int argc, char **argv)
 {
+    init_cap();
     if(argc == 3)
     {
         const size_t size_string_date_time_format = strlen(argv[1]) + strlen(argv[2]) + 2;
@@ -35,14 +38,14 @@ int main(int argc, char **argv)
 
 int set_time(const char *format_time)
 {
-    struct tm time;
+    time_t now_time = time(NULL);
+    struct tm *time = localtime(&now_time);
 
-    if(strptime(format_time, "%d/%m/%Y %H:%M:%S", &time) == NULL)
+    if(strptime(format_time, "%d/%m/%Y %H:%M:%S", time) == NULL)
     {
         return -1;
     }
-
-    struct timeval new_time = { mktime(&time), 0 };
+    struct timeval new_time = { mktime(time), 0 };
 
     if(settimeofday(&new_time, 0) == 0)
     {
@@ -50,4 +53,47 @@ int set_time(const char *format_time)
     }
 
     return -1;
+}
+
+void init_cap()
+{
+    cap_t cap = cap_get_proc();
+    cap_value_t t = CAP_SYS_TIME;
+    if(cap_clear_flag(cap, CAP_PERMITTED) == -1)
+    {
+        cap_free(cap);
+        perror("cap_clear_flag() : ");
+        exit(1);
+    }
+    if(cap_clear_flag(cap, CAP_INHERITABLE) == -1)
+    {
+        cap_free(cap);
+        perror("cap_clear_flag() : ");
+        exit(1);
+    }
+    if(cap_clear_flag(cap, CAP_EFFECTIVE) == -1)
+    {
+        cap_free(cap);
+        perror("cap_clear_flag() : ");
+        exit(1);
+    }
+
+    if(cap_set_flag(cap, CAP_PERMITTED, 1, &t, CAP_SET) == -1)
+    {
+        perror("cap_set_flag() : ");
+    }
+    if(cap_set_flag(cap, CAP_EFFECTIVE, 1, &t, CAP_SET) == -1)
+    {
+        perror("cap_set_flag() : ");
+    }
+    if(cap_set_flag(cap, CAP_INHERITABLE, 1, &t, CAP_SET) == -1)
+    {
+        perror("cap_set_flag() : ");
+    }
+
+    if(cap_set_proc(cap) == -1)
+    {
+        printf("Erreur to set cap\n");
+    }
+    cap_free(cap);
 }

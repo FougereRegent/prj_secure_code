@@ -9,7 +9,7 @@ EXEC=bin
 all: $(EXEC)
 	make clean
 $(EXEC): $(SRC)main.c $(SRC)treatment_time.o $(SRC)UI.o $(SRC)server.o
-	$(CC) $(INC) $(FLAGS) -lcap -pthread -o $@ $^
+	$(CC) $(INC) $(FLAGS) -pthread -o $@ $^ -lcap
 
 $(SRC)%.o: $(SRC)%.c
 	$(CC) $(INC) $(FLAGS) -o $(SCR)$@ -c $<
