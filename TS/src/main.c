@@ -5,36 +5,46 @@
 #include <time.h>
 #include <sys/time.h>
 #include <regex.h>
+#include <string.h>
+#include <errno.h>
 
 int set_time(const char *format_time);
 int comp_match(char *command);
+void init();
 
 
 int main(int argc, char **argv)
 {
+    char *date_time_string;
 
-    return EXIT_SUCCESS;
-}
-
-static int regex_match(char *command)
-{
-    regex_t regex[2];
-    int result[2];
-    *result = regcomp(regex, "set", 0);
-    *(result + 1) = regcomp(regex + 1, "set [:number:]/[:number:]/[:number:] [:number:]:[:number:]:[:number:]", 0);
-
-    int index_regex = 0, error = 0;
-    for(; index_regex < 2; index_regex++)
+    init();
+    switch (argc)
     {
-        if(regexec(regex + index_regex, command, 0, NULL, 0) == 0)
-        {
-            error = 0;
+        case 2:
+            date_time_string = (char*) calloc(sizeof(char), strlen(argv[0]) + 1);
+            strcpy(date_time_string, argv[1]);
+            if(set_time(date_time_string) == -1)
+            {
+                printf("Error you can't set the time.\n");
+            }
             break;
-        }
-        error = -1;
+        case 3:
+            date_time_string = (char*) calloc(sizeof(char), strlen(argv[0]) + strlen(argv[1]) + 2);
+            strcpy(date_time_string, argv[1]);
+            strcat(date_time_string, " ");
+            strcat(date_time_string, argv[2]);
+            if(set_time(date_time_string) == -1)
+            {
+                printf("Error you can't set the time.\n");
+            }
+            break;
+        default:
+            break;
     }
 
-    return error;
+    if(date_time_string == NULL)
+        free(date_time_string);
+    return EXIT_SUCCESS;
 }
 
 int set_time(const char *format_time)
@@ -48,5 +58,11 @@ int set_time(const char *format_time)
             return 0;
         }
     }
+    perror("erreur : ");
     return -1;
+}
+
+void init()
+{
+    putenv("DATEMSK=./template.txt");
 }
