@@ -14,8 +14,7 @@ void loop_command()
     {
         printf("> ");
         if (fgets(command, MAX_SIZE, stdin) ){
-            if(strcmp(command, "quit\n") != 0)
-                treatment_command(command);
+            treatment_command(command);
         } else {
             perror("Erreur de la fonction");
             exit(1);
@@ -28,7 +27,9 @@ void loop_command()
 
 static void treatment_command(char *command)
 {
-    if(regex_match(command) == 0)
+    if(strcmp(command, "quit\n") == 0)
+        exit(1);
+    else if(regex_match(command) == 0)
     {
         const int size_format_time = strlen(command) - 4;
         char *format_time = (char*)calloc(sizeof(char), size_format_time);
