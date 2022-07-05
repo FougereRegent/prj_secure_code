@@ -3,37 +3,44 @@
 #include <errno.h>
 #include <sys/unistd.h>
 #include <regex.h>
-
+#include <string.h>
 #include "UI.h"
 
 
 void loop_command()
 {
     char *command = calloc(sizeof(char), MAX_SIZE);
-    printf("> ");
-    if(fgets(command, MAX_SIZE, stdin ) != NULL)
+    while(strcmp(command, "quit\n") != 0)
     {
-        treatment_command(command);
+        printf("> ");
+        if (fgets(command, MAX_SIZE, stdin) ){
+            if(strcmp(command, "quit\n") != 0)
+                treatment_command(command);
+        } else {
+            perror("Erreur de la fonction");
+            exit(1);
+        }
         fflush(stdin);
     }
-    else
-    {
-        perror("Erreur de la fonction");
-        exit(1);
-    }
+
+    free(command);
 }
 
 static void treatment_command(char *command)
 {
     if(regex_match(command) == 0)
     {
-        printf("It's good\n");
+        const int size_format_time = strlen(command) - 4;
+        char *format_time = (char*)calloc(sizeof(char), size_format_time);
+        strncpy(format_time, command + 5, size_format_time);
+
+        now_time(format_time);
+        free(format_time);
     }
     else
     {
-        printf("Erreur");
+        printf("Error the command or pattern doesn't exist \n");
     }
-    free(command);
 }
 
 static int regex_match(char *command)
@@ -64,4 +71,14 @@ static int regex_match(char *command)
     free(all_result);
 
     return error == 0 ? 0 : 1;
+}
+
+static void now_time(char *format_string)
+{
+
+}
+
+static void set_time(char *value)
+{
+
 }

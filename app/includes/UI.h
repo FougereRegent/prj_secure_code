@@ -9,6 +9,8 @@ extern void loop_command();
 
 static void treatment_command(char *command);
 static int regex_match(char *command);
+static void now_time(char *format_string);
+static void set_time(char *value);
 /*
  There are two kind of command, they are describe below :
     - time -> this request is used to return date in specific format
