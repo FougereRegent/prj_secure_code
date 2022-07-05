@@ -4,7 +4,7 @@
 #ifndef PRJ_UI_H
 #define PRJ_UI_H
 #define MAX_SIZE 24
-#define NB_KIND_OF_FORMAT_DATE 10
+#define NB_KIND_OF_FORMAT_DATE 6
 extern void loop_command();
 
 static void treatment_command(char *command);
