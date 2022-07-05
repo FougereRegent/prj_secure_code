@@ -1,19 +1,16 @@
-CC = gcc
-FLAGS = -Wall -g
-SOURCES = main.c
+CC=gcc
+FLAGS=-Wall -g
+INC=-I includes/
+SRC= src/
+EXEC=bin
 
-.PHONY = clean
+.PHONY=clean
 
-bin : %.o
-	@echo "Compilation des fichiers obj"
-	$(CC) $< -o $@
-	make clean
+$(EXEC): $(SRC)main.c $(SRC)UI.o
+	$(CC) $(INC) $(FLAGS) -o $@ $^
 
-%.o : $(SOURCES)
-	@echo "Compilation des sources"
-	$(CC) $(FLAGS) $<
-
+$(SRC)%.o: $(SRC)%.c
+	$(CC) $(INC) $(FLAGS) -o $(SCR)$@ -c $<
 
 clean:
-	@echo "Suppression de tous les fichiers obj"
-	rm -f *.o
+	rm -f $(SRC)*.o
