@@ -1,15 +1,19 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/types.h>
 #include <errno.h>
 #include <sys/unistd.h>
 #include <regex.h>
 #include <string.h>
 #include "UI.h"
 
+/*Flags*/
+#define FLAGS_DISPLAY_TIME 1
+#define FLAGS_SET_TIME 2
 
 void loop_command()
 {
-    char *command = calloc(sizeof(char), MAX_SIZE);
+    char command[MAX_SIZE] = {0x00};
     while(strcmp(command, "quit\n") != 0)
     {
         printf("> ");
@@ -21,8 +25,6 @@ void loop_command()
         }
         fflush(stdin);
     }
-
-    free(command);
 }
 
 static void treatment_command(char *command)
@@ -36,19 +38,21 @@ static void treatment_command(char *command)
         strncpy(format_time, command + 5, size_format_time);
 
         now_time(format_time);
+
         free(format_time);
     }
     else
     {
         printf("Error the command or pattern doesn't exist \n");
     }
+
 }
 
 static int regex_match(char *command)
 {
     /*Attribution des regex*/
-    regex_t *regex = calloc(sizeof (regex_t), NB_KIND_OF_FORMAT_DATE);
-    int *all_result = calloc(sizeof(int), NB_KIND_OF_FORMAT_DATE);
+    regex_t regex[NB_KIND_OF_FORMAT_DATE];
+    int all_result[NB_KIND_OF_FORMAT_DATE];
 
     *(all_result + 0) = regcomp(regex, "time DD/MM/YYYY", 0);
     *(all_result + 1) = regcomp(regex + 1, "time DD/MMM/YYYY hh:mm:ss", 0);
@@ -67,11 +71,12 @@ static int regex_match(char *command)
         }
         error = 1;
     }
-
-    free(regex);
-    free(all_result);
-
     return error == 0 ? 0 : 1;
+}
+
+static void display_result(char *format_string, u_int8_t FLAGS)
+{
+
 }
 
 static void now_time(char *format_string)
@@ -79,7 +84,7 @@ static void now_time(char *format_string)
 
 }
 
-static void set_time(char *value)
+static int set_time(char *value)
 {
 
 }
