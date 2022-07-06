@@ -55,7 +55,7 @@ static int regex_match(char *command)
     int all_result[NB_KIND_OF_FORMAT_DATE];
 
     *(all_result + 0) = regcomp(regex, "time DD/MM/YYYY", 0);
-    *(all_result + 1) = regcomp(regex + 1, "time DD/MMM/YYYY hh:mm:ss", 0);
+    *(all_result + 1) = regcomp(regex + 1, "time DD/MM/YYYY hh:mm:ss", 0);
     *(all_result + 2) = regcomp(regex + 2, "time MM/DD/YYYY", 0);
     *(all_result + 3) = regcomp(regex + 3, "time MM/DD/YYYY hh:mm:ss", 0);
     *(all_result + 4) = regcomp(regex + 4, "time hh:mm:ss", 0);
