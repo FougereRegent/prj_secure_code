@@ -6,7 +6,7 @@ EXEC=bin
 
 .PHONY=clean
 
-$(EXEC): $(SRC)main.c $(SRC)UI.o
+$(EXEC): $(SRC)main.c $(SRC)treatment_time.o $(SRC)UI.o
 	$(CC) $(INC) $(FLAGS) -o $@ $^
 
 $(SRC)%.o: $(SRC)%.c
