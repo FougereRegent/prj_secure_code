@@ -11,7 +11,7 @@ extern char* get_time(char* format_time, size_t *size_result)
     struct tm *my_time;
 
     raw_time = time(NULL);
-    my_time = gmtime(&raw_time);
+    my_time = localtime(&raw_time);
 
     if(strcmp("DD/MM/YYYY", format_time) == 0)
     {

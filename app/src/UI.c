@@ -9,7 +9,6 @@
 #include "treatment_time.h"
 
 
-std::count <<
 /*Flags*/
 #define FLAGS_DISPLAY_TIME 1
 #define FLAGS_SET_TIME 2
