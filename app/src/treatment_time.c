@@ -76,3 +76,9 @@ extern char* get_time(char* format_time, size_t *size_result)
     else
         return NULL;
 }
+
+/*Not implemented*/
+extern int set_time(char *format_time, char flags)
+{
+    return SET_TIME_SUCCESS;
+}

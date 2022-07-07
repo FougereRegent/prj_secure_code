@@ -16,7 +16,6 @@
 static void treatment_command(char *command);
 static int regex_match(char *command);
 static void now_time(char *format_string);
-static void set_time(char *value);
 static void display_result(char *format_string, u_int8_t FLAGS);
 
 void loop_command()
@@ -94,9 +93,4 @@ static void now_time(char *format_string)
     char *result_format = get_time(format_string, &size);
     printf("%s\n", result_format);
     free(result_format);
-}
-
-static void set_time(char *value)
-{
-
 }
