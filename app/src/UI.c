@@ -8,10 +8,16 @@
 #include "UI.h"
 #include "treatment_time.h"
 
-
 /*Flags*/
 #define FLAGS_DISPLAY_TIME 1
 #define FLAGS_SET_TIME 2
+
+/*Prototype*/
+static void treatment_command(char *command);
+static int regex_match(char *command);
+static void now_time(char *format_string);
+static void set_time(char *value);
+static void display_result(char *format_string, u_int8_t FLAGS);
 
 void loop_command()
 {
