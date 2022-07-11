@@ -8,7 +8,7 @@
 #include "treatment_time.h"
 
 /*Not implemented*/
-extern char* get_time(char* format_time, size_t *size_result)
+extern char* get_time(const char* format_time, size_t *size_result)
 {
     time_t raw_time;
     struct tm *my_time;
@@ -81,15 +81,15 @@ extern char* get_time(char* format_time, size_t *size_result)
 }
 
 /*Not implemented*/
-extern int set_time(char *format_time, char flags)
+extern int set_time(const char *format_time)
 {
     struct tm *time = getdate(format_time);
     if(getdate_err == 0)
     {
-        struct timeval new_time = {mktime(tm), 0};
+        struct timeval new_time = { mktime(time), 0 };
         if(settimeofday(&new_time, 0) == 0)
         {
-            return SET_TIME_SUCCESS
+            return SET_TIME_SUCCESS;
         }
     }
     return SET_TIME_FAILED;

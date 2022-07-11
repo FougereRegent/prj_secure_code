@@ -9,7 +9,7 @@ EXEC=bin
 all: $(EXEC)
 	make clean
 $(EXEC): $(SRC)main.c $(SRC)treatment_time.o $(SRC)UI.o
-	$(CC) $(INC) $(FLAGS) -o $@ $^
+	$(CC) $(INC) $(FLAGS) -lcap -o $@ $^
 
 $(SRC)%.o: $(SRC)%.c
 	$(CC) $(INC) $(FLAGS) -o $(SCR)$@ -c $<

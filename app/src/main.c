@@ -1,11 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#define _GNU_SOURCE
-#define __USE_XOPEN_EXTENDED
-#include <time.h>
-#include <sys/time.h>
-//#include "UI.h"
+#include <sys/capability.h>
+#include "UI.h"
 
 void init();
 
@@ -18,5 +14,7 @@ int main(int argc, char **argv)
 
 void init()
 {
+    cap_value_t val = CAP_SYS_TIME;
+    printf("%d\n", CAP_SYS_TIME);
     putenv("DATEMSK=./template.txt");
 }

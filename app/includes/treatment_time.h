@@ -11,7 +11,7 @@
 #define SET_TIME_FAILED 1
 
 
-extern char* get_time(char *format_time, size_t *size_result);
-extern int set_time(char *format_time, char flags);
+extern char* get_time(const char *format_time, size_t *size_result);
+extern int set_time(const char *format_time);
 
 #endif //PRJ_TREATMENT_TIME_H
