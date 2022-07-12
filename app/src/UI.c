@@ -59,28 +59,26 @@ static void treatment_command(char *command)
 
 static int regex_match(char *command)
 {
-    /*Attribution des regex*/
-    regex_t regex[NB_KIND_OF_FORMAT_DATE];
     int all_result[NB_KIND_OF_FORMAT_DATE];
 
-    *(all_result + 0) = regcomp(regex, "time DD/MM/YYYY", 0);
-    *(all_result + 1) = regcomp(regex + 1, "time DD/MM/YYYY hh:mm:ss", 0);
-    *(all_result + 2) = regcomp(regex + 2, "time MM/DD/YYYY", 0);
-    *(all_result + 3) = regcomp(regex + 3, "time MM/DD/YYYY hh:mm:ss", 0);
-    *(all_result + 4) = regcomp(regex + 4, "time hh:mm:ss", 0);
-    *(all_result + 5) = regcomp(regex+5, "time", 0);
+    *(all_result + 0) = strcmp(command, "time DD/MM/YYYY\n");
+    *(all_result + 1) = strcmp(command, "time DD/MM/YYYY hh:mm:ss\n");
+    *(all_result + 2) = strcmp(command, "time MM/DD/YYYY\n");
+    *(all_result + 3) = strcmp(command, "time MM/DD/YYYY hh:mm:ss\n");
+    *(all_result + 4) = strcmp(command, "time hh:mm:ss\n");
+    *(all_result + 5) = strcmp(command, "time\n");
 
     int index_regex = 0, error = 0;
     for(; index_regex < NB_KIND_OF_FORMAT_DATE; index_regex++  )
     {
-        if(regexec((regex + index_regex), command, 0, NULL, 0) == 0)
+        if(*(all_result + index_regex) == 0)
         {
             error = 0;
             break;
         }
-        error = 1;
+        error = -1;
     }
-    return error == 0 ? 0 : 1;
+    return error == 0 ? 0 : -1;
 }
 
 static void display_result(char *format_string, u_int8_t FLAGS)
@@ -92,6 +90,9 @@ static void now_time(char *format_string)
 {
     size_t size;
     char *result_format = get_time(format_string, &size);
-    printf("%s\n", result_format);
-    free(result_format);
+    if(result_format != NULL)
+    {
+        printf("%s\n", result_format);
+        free(result_format);
+    }
 }
