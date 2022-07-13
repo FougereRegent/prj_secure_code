@@ -6,6 +6,7 @@ EXEC=ts
 .PHONY=clean
 
 all: $(EXEC)
+	setcap "CAP_SYS_TIME=ep" $(EXEC)
 	make clean
 $(EXEC): $(SRC)main.c
 	$(CC) $(FLAGS) -lcap -o $@ $^
