@@ -14,6 +14,7 @@
 
 /*Prototype*/
 static void treatment_command(char *command);
+static int comp_match(char *command);
 static int regex_match(char *command);
 static void now_time(char *format_string);
 static void display_result(char *format_string, u_int8_t FLAGS);
@@ -40,7 +41,7 @@ static void treatment_command(char *command)
 {
     if(strcmp(command, "quit\n") == 0)
         exit(1);
-    else if(regex_match(command) == 0)
+    else if(comp_match(command) == 0)
     {
         const int size_format_time = strcmp(command, "time\n") == 0 ? 0 : strlen(command) - 6;
         char *format_time = (char*)calloc(sizeof(char), size_format_time);
@@ -50,6 +51,10 @@ static void treatment_command(char *command)
 
         free(format_time);
     }
+    else if(regex_match(command) == 0)
+    {
+        printf("It's good pattern \n");
+    }
     else
     {
         printf("Error the command or pattern doesn't exist \n");
@@ -58,6 +63,26 @@ static void treatment_command(char *command)
 }
 
 static int regex_match(char *command)
+{
+    regex_t regex[2];
+    int result[2];
+    *result = regcomp(regex, "set", 0);
+    *(result + 1) = regcomp(regex + 1, "set [:number:]/[:number:]/[:number:] [:number:]:[:number:]:[:number:]", 0);
+
+    int index_regex = 0, error = 0;
+    for(; index_regex < 2; index_regex++)
+    {
+        if(regexec(regex + index_regex, command, 0, NULL, 0) == 0)
+        {
+            error = 0;
+            break;
+        }
+        error = -1;
+    }
+
+    return error;
+}
+static int comp_match(char *command)
 {
     int all_result[NB_KIND_OF_FORMAT_DATE];
 

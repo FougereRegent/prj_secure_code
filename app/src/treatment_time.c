@@ -80,17 +80,3 @@ extern char* get_time(const char* format_time, size_t *size_result)
         return NULL;
 }
 
-/*Not implemented*/
-extern int set_time(const char *format_time)
-{
-    struct tm *time = getdate(format_time);
-    if(getdate_err == 0)
-    {
-        struct timeval new_time = { mktime(time), 0 };
-        if(settimeofday(&new_time, 0) == 0)
-        {
-            return SET_TIME_SUCCESS;
-        }
-    }
-    return SET_TIME_FAILED;
-}
