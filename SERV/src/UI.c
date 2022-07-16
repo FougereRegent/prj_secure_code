@@ -109,11 +109,6 @@ static int comp_match(char *command)
     return error == 0 ? 0 : -1;
 }
 
-static void display_result(char *format_string, u_int8_t FLAGS)
-{
-
-}
-
 static void now_time(char *format_string)
 {
     size_t size;
