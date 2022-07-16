@@ -44,9 +44,11 @@ extern void listen_request(SOCKET *listen_socket)
     SOCKET csock;
     SOCKADDR_IN csin = {0};
     int sin_csize = sizeof(csin);
+    char data[30];
 
     while(1)
     {
+        int n = 0;
         csock = accept(*listen_socket, (SOCKADDR *)&csin, &sin_csize);
         if(csock == -1)
         {
@@ -56,6 +58,20 @@ extern void listen_request(SOCKET *listen_socket)
         else
         {
             printf("Connected\n");
+            send_response(csock);
         }
     }
+}
+
+extern void send_response(SOCKET client_socket)
+{
+    char data[RECV_SIZE_MSG];
+    if((n = recv(client_socket, data, RECV_SIZE_MSG, 0)) == -1)
+    {
+        perror("recv(): ");
+        exit(1);
+    }
+
+
+
 }
