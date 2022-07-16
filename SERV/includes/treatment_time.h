@@ -12,6 +12,6 @@
 
 
 extern char* get_time(const char *format_time, size_t *size_result);
-extern int set_time(const char *format_time);
+extern int set_time(const char *time);
 
 #endif //PRJ_TREATMENT_TIME_H

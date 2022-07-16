@@ -31,7 +31,6 @@ void loop_command()
             perror("Erreur de la fonction");
             exit(1);
         }
-        set_time("17/11/2001 10:10:10");
         fflush(stdin);
 
     }
@@ -53,7 +52,11 @@ static void treatment_command(char *command)
     }
     else if(regex_match(command) == 0)
     {
-        printf("It's good pattern \n");
+        const int size_string = strlen(command) - 4;
+        char *new_time = (char*)calloc(sizeof(char), strlen(command) - 4);
+        strncpy(new_time, command + 4, size_string);
+
+        set_time(new_time);
     }
     else
     {
@@ -66,8 +69,8 @@ static int regex_match(char *command)
 {
     regex_t regex[2];
     int result[2];
-    *result = regcomp(regex, "set", 0);
-    *(result + 1) = regcomp(regex + 1, "set [:number:]/[:number:]/[:number:] [:number:]:[:number:]:[:number:]", 0);
+    *result = regcomp(regex, "^set [[:digit:]]{2}:[[:digit:]]{2}:[[:digit:]]{2}", REG_EXTENDED);
+    *(result + 1) = regcomp(regex + 1, "^set [[:digit:]]{2}/[[:digit:]]{2}/[[:digit:]]{4} [[:digit:]]{2}:[[:digit:]]{2}:[[:digit:]]{2}", REG_EXTENDED);
 
     int index_regex = 0, error = 0;
     for(; index_regex < 2; index_regex++)

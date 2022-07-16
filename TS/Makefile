@@ -7,9 +7,9 @@ EXEC=ts
 
 all: $(EXEC)
 	setcap "CAP_SYS_TIME=ep" $(EXEC)
-	make clean
+
 $(EXEC): $(SRC)main.c
 	$(CC) $(FLAGS) -lcap -o $@ $^
 
 clean:
-	rm -f $(SRC)*.o
+	rm -f server ts

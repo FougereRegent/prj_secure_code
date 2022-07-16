@@ -25,7 +25,9 @@ int main(int argc, char **argv)
             strcpy(date_time_string, argv[1]);
             if(set_time(date_time_string) == -1)
             {
-                printf("Error you can't set the time.\n");
+                if(date_time_string == NULL)
+                    free(date_time_string);
+                return EXIT_FAILURE;
             }
             break;
         case 3:
@@ -35,7 +37,9 @@ int main(int argc, char **argv)
             strcat(date_time_string, argv[2]);
             if(set_time(date_time_string) == -1)
             {
-                printf("Error you can't set the time.\n");
+                if(date_time_string == NULL)
+                    free(date_time_string);
+                return EXIT_FAILURE;
             }
             break;
         default:
@@ -64,5 +68,5 @@ int set_time(const char *format_time)
 
 void init()
 {
-    putenv("DATEMSK=./template.txt");
+    putenv("DATEMSK=/etc/NetworkClock/template.txt");
 }
