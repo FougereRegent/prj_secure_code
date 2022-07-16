@@ -8,7 +8,7 @@ EXEC=bin
 
 all: $(EXEC)
 	make clean
-$(EXEC): $(SRC)main.c $(SRC)treatment_time.o $(SRC)UI.o
+$(EXEC): $(SRC)main.c $(SRC)treatment_time.o $(SRC)UI.o $(SRC)server.o
 	$(CC) $(INC) $(FLAGS) -lcap -o $@ $^
 
 $(SRC)%.o: $(SRC)%.c
