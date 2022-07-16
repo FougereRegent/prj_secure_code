@@ -19,10 +19,14 @@ int main(int argc, char **argv)
             .sin_family = AF_INET,
             .sin_port = htons(8080)
     };
+    char data[30] = "hh:mm:ss";
+    int n = 0;
+    char recv_data[30];
 
     if(inet_pton(AF_INET, "127.0.0.1", &addr.sin_addr) < 0)
     {
         perror("inet_pton(): ");
+        return -1;
     }
     if(sock == -1)
     {
@@ -35,6 +39,18 @@ int main(int argc, char **argv)
         perror("connect(): ");
         return -1;
     }
+
+    if(send(sock, data, 30, 0) == - 1)
+    {
+        perror("send(): ");
+    }
+
+    if((n = recv(sock, recv_data, 30, 0)) == -1)
+    {
+        perror("recv(): ");
+    }
+
+    printf("%s\n", recv_data);
 
     return 0;
 

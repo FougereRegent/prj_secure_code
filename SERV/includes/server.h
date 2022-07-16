@@ -9,6 +9,7 @@
 #define ERROR_SOCKET -1
 #define ERROR_RECV -1
 #define ERROR_SEND -1
+#define SUCCESS_SEND 0
 #define ERROR_BIND -1
 
 typedef int SOCKET;

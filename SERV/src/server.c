@@ -1,10 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include "server.h"
+#include "treatment_time.h"
 
+/*Prototypes*/
+int send_result_request(const SOCKET* client_socket, const char* result);
 
 /*This function initialize a listen socket*/
 extern SOCKET init_socket(const int listen_port)
@@ -48,7 +52,6 @@ extern void listen_request(SOCKET *listen_socket)
 
     while(1)
     {
-        int n = 0;
         csock = accept(*listen_socket, (SOCKADDR *)&csin, &sin_csize);
         if(csock == -1)
         {
@@ -66,12 +69,30 @@ extern void listen_request(SOCKET *listen_socket)
 extern void send_response(SOCKET client_socket)
 {
     char data[RECV_SIZE_MSG];
+    int n = 0;
     if((n = recv(client_socket, data, RECV_SIZE_MSG, 0)) == -1)
     {
         perror("recv(): ");
         exit(1);
     }
 
+    size_t size_result;
+    char *result = get_time(data, &size_result);
+    if(result == NULL)
+    {
+        send_result_request(&client_socket, "Error, this format doesn't exist");
+    }
+    send_result_request(&client_socket, result);
 
+}
 
+int send_result_request(const SOCKET* client_socket,const char *message)
+{
+    const int taille_message = strlen(message);
+    if(send(*client_socket, message, taille_message, 0) == -1)
+    {
+        return ERROR_SEND;
+    }
+
+    return SUCCESS_SEND;
 }
