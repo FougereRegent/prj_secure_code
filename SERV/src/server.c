@@ -60,7 +60,6 @@ extern void listen_request(SOCKET *listen_socket)
         }
         else
         {
-            printf("Connected\n");
             send_response(csock);
         }
     }
