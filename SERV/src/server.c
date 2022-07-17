@@ -8,7 +8,7 @@
 #include "treatment_time.h"
 
 /*Prototypes*/
-int send_result_request(const SOCKET* client_socket, const char* result);
+int send_result_request(const SOCKET* client_socket,const char *message, const size_t size_msg);
 
 /*This function initialize a listen socket*/
 extern SOCKET init_socket(const int listen_port)
@@ -68,6 +68,7 @@ extern void listen_request(SOCKET *listen_socket)
 extern void send_response(SOCKET client_socket)
 {
     char data[RECV_SIZE_MSG];
+    const char *error_msg = "This format doesn't exist\n";
     int n = 0;
     if((n = recv(client_socket, data, RECV_SIZE_MSG, 0)) == -1)
     {
@@ -79,19 +80,17 @@ extern void send_response(SOCKET client_socket)
     char *result = get_time(data, &size_result);
     if(result == NULL)
     {
-        send_result_request(&client_socket, "Error, this format doesn't exist");
+        send_result_request(&client_socket, error_msg, strlen(error_msg));
     }
-    send_result_request(&client_socket, result);
+    send_result_request(&client_socket, result, size_result );
 
 }
 
-int send_result_request(const SOCKET* client_socket,const char *message)
+int send_result_request(const SOCKET* client_socket,const char *message, const size_t size_msg)
 {
-    const int taille_message = strlen(message);
-    if(send(*client_socket, message, taille_message, 0) == -1)
+    if(send(*client_socket, message, size_msg, 0) == -1)
     {
         return ERROR_SEND;
     }
-
     return SUCCESS_SEND;
 }
