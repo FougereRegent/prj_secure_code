@@ -82,11 +82,10 @@ extern char* get_time(const char* format_time, size_t *size_result)
 
 extern int set_time(const char *time)
 {
-    char *path_of_file = "~/Documents/Prague/Secure_Code/prj/TS/ts ";
+    char *path_of_file = "/bin/NC/ts ";
     char *string = (char*)calloc(sizeof(char), strlen(time) + strlen(path_of_file));
     strcat(string, path_of_file);
     strcat(string, time);
-    printf("%s", string);
 
     if(!system(string))
     {
