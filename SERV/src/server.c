@@ -43,7 +43,7 @@ extern SOCKET init_socket(const int listen_port)
     return listen_sock;
 }
 
-extern void listen_request(SOCKET *listen_socket)
+extern void *listen_request(SOCKET *listen_socket)
 {
     SOCKET csock;
     SOCKADDR_IN csin = {0};

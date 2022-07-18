@@ -5,10 +5,6 @@
 #include <netinet/in.h>
 #include<arpa/inet.h>
 
-
-#define ERROR_ADDR_IP -10
-#define ERROR_SEND_MSG -20
-#define ERROR_RECV_MSG -30
 #define LENGHT_ADDR_IP 17
 #define LENGHT_FORMAT_DATE 21
 
@@ -89,7 +85,6 @@ int send_message(const char *addr_ip, const int port, const char *format)
             .sin_port = htons(port)
     };
 
-    char data[30];
     char recv_data[30];
     int n = 0;
 
@@ -110,7 +105,7 @@ int send_message(const char *addr_ip, const int port, const char *format)
         return -1;
     }
 
-    if(send(sock, data, 30, 0) == - 1)
+    if(send(sock, format, LENGHT_FORMAT_DATE, 0) == - 1)
     {
         perror("send(): ");
         return -1;

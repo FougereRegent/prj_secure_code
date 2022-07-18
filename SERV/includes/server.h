@@ -19,6 +19,6 @@ typedef struct sockaddr SOCKADDR;
 typedef struct in_addr IN_ADDR;
 
 extern SOCKET init_socket(const int listen_port);
-extern void listen_request(SOCKET *listen_sock);
+extern void *listen_request(SOCKET *listen_sock);
 extern void send_response(SOCKET client_socket);
 #endif //PRJ_SERVER_H
