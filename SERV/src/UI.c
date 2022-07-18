@@ -17,7 +17,6 @@ static void treatment_command(char *command);
 static int comp_match(char *command);
 static int regex_match(char *command);
 static void now_time(char *format_string);
-static void display_result(char *format_string, u_int8_t FLAGS);
 
 void loop_command()
 {
