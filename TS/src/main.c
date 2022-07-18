@@ -68,5 +68,5 @@ int set_time(const char *format_time)
 
 void init()
 {
-    putenv("DATEMSK=/etc/NetworkClock/template.txt");
+    putenv("DATEMSK=/etc/NC/template.txt");
 }
