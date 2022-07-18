@@ -43,16 +43,16 @@ extern SOCKET init_socket(const int listen_port)
     return listen_sock;
 }
 
-extern void *listen_request(SOCKET *listen_socket)
+extern void *listen_request(void *listen_socket)
 {
+    SOCKET *listen_sock = (SOCKET*) listen_socket;
     SOCKET csock;
     SOCKADDR_IN csin = {0};
-    int sin_csize = sizeof(csin);
-    char data[30];
+    socklen_t sin_csize = sizeof(csin);
 
     while(1)
     {
-        csock = accept(*listen_socket, (SOCKADDR *)&csin, &sin_csize);
+        csock = accept(*listen_sock, (SOCKADDR *)&csin, &sin_csize);
         if(csock == -1)
         {
             perror("accept() : ");
