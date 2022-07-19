@@ -9,7 +9,7 @@
 #include <errno.h>
 
 int set_time(const char *format_time);
-int comp_match(char *command);
+int check_format_time(const char* format_time);
 void init();
 
 
@@ -28,22 +28,54 @@ int main(int argc, char **argv)
         }
 
         strncpy(date_time_string, argv[1], size_string_date_time_format);
+        set_time(date_time_string);
+        free(date_time_string);
     }
     return EXIT_SUCCESS;
 }
 
+int check_format_time(const char *format_date)
+{
+    regex_t regex_check_format_time;
+
+    if(regcomp(&regex_check_format_time, "^([0-1][0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$", REG_EXTENDED) != 0)
+    {
+        printf("The regualr expression doesn't compile\n");
+        return -1;
+    }
+
+    if(regexec(&regex_check_format_time, format_date, 0, NULL, 0) == 0)
+    {
+        return 0;
+    }
+    return -1;
+}
+
 int set_time(const char *format_time)
 {
-    struct tm *time = getdate(format_time);
-    if(getdate_err == 0)
-    {
-        struct timeval new_time = { mktime(time), 0 };
-        if(settimeofday(&new_time, 0) == 0)
-        {
-            return 0;
-        }
+    if(check_format_time(format_time) < 0) {
+        printf("Format error, use this format hh:mm:ss\n");
+        return -1;
     }
-    perror("erreur : ");
+
+    const char hours[2] = {format_time[0], format_time[1]};
+    const char minutes[2] = {format_time[3], format_time[4]};
+    const char seconds[2] = {format_time[6], format_time[7]};
+
+    time_t raw_time = time(NULL);
+    struct tm *time  = localtime(&raw_time);
+
+    time->tm_hour = atoi(hours);
+    time->tm_min = atoi(minutes);
+    time->tm_sec = atoi(seconds);
+
+    struct timeval new_time = { mktime(time), 0 };
+
+    if(settimeofday(&new_time, 0) == 0)
+    {
+        return 0;
+    }
+
     return -1;
 }
 
