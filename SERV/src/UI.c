@@ -64,26 +64,18 @@ static void treatment_command(char *command)
 
 }
 
-static int regex_match(char *command)
-{
-    regex_t regex[2];
-    int result[2];
-    *result = regcomp(regex, "^set [[:digit:]]{2}:[[:digit:]]{2}:[[:digit:]]{2}", REG_EXTENDED);
-    *(result + 1) = regcomp(regex + 1, "^set [[:digit:]]{2}/[[:digit:]]{2}/[[:digit:]]{4} [[:digit:]]{2}:[[:digit:]]{2}:[[:digit:]]{2}", REG_EXTENDED);
+static int regex_match(char *command) {
+    regex_t regex;
+    int result;
+    *result = regcomp(regex, "^set ([0-1][0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$", REG_EXTENDED);
 
-    int index_regex = 0, error = 0;
-    for(; index_regex < 2; index_regex++)
-    {
-        if(regexec(regex + index_regex, command, 0, NULL, 0) == 0)
-        {
-            error = 0;
-            break;
-        }
-        error = -1;
-    }
+    if (regexec(regex + index_regex, command, 0, NULL, 0) == 0)
+        return 0;
 
-    return error;
+    return -1;
 }
+
+/*Fonction Obsolète à changer dans l'avenir*/
 static int comp_match(char *command)
 {
     int all_result[NB_KIND_OF_FORMAT_DATE];
