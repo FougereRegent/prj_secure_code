@@ -14,7 +14,6 @@ int check_format_time(const char* format_time);
 
 int main(int argc, char **argv)
 {
-    init();
     if(argc == 2)
     {
         const size_t size_string_date_time_format = strlen(argv[1]) + 1;
