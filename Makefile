@@ -11,8 +11,6 @@ install: compil
 	mv ./client/$(NAME_CLIENT) /bin/NC/nc_client
 	ln /bin/NC/server_nc /bin/server_nc
 	ln /bin/NC/nc_client /bin/nc_client
-	@mkdir -p /etc/NC/
-	@cp ./TS/template.txt /etc/NC/.
 compil:
 	make -C ./SERV/.
 	make -C ./TS/.

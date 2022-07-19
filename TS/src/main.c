@@ -10,7 +10,6 @@
 
 int set_time(const char *format_time);
 int check_format_time(const char* format_time);
-void init();
 
 
 int main(int argc, char **argv)
@@ -77,9 +76,4 @@ int set_time(const char *format_time)
     }
 
     return -1;
-}
-
-void init()
-{
-    putenv("DATEMSK=/etc/NC/template.txt");
 }
