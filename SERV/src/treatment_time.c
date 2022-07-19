@@ -27,7 +27,7 @@ extern char* get_time(const char* format_time, size_t *size_result)
     while((result_strftime = strftime(result, *size_result, format_time, my_time)) == 0)
     {
         *size_result += 16;
-        if((result = realloc(result, size_result)) == NULL)
+        if((result = realloc(result, *size_result)) == NULL)
         {
             perror("realloc() : ");
             return NULL;
@@ -35,7 +35,7 @@ extern char* get_time(const char* format_time, size_t *size_result)
     }
 
     *size_result = result_strftime + 1;
-    if((result = realloc(result, size_result)) == NULL)
+    if((result = realloc(result, *size_result)) == NULL)
     {
         perror("realloc() : ");
         return NULL;

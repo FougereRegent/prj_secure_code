@@ -9,97 +9,100 @@
 #include "treatment_time.h"
 
 /*Flags*/
-#define FLAGS_DISPLAY_TIME 1
-#define FLAGS_SET_TIME 2
+#define FLAG_DISPLAY_TIME 1
+#define FLAG_SET_TIME 2
+#define FLAG_QUIT_APP 3
 
 /*Prototype*/
-static void treatment_command(char *command);
-static int comp_match(char *command);
-static int regex_match(char *command);
+static int treatment_command(char *command);
+static int comp_match(const char *command);
+static int regex_match(const char *command, const int flag);
 static void now_time(char *format_string);
 
 void loop_command()
 {
-    char command[MAX_SIZE];
-    while(strcmp(command, "quit\n") != 0)
+    char command[MAX_SIZE_COMMAND_INPUT];
+    int result_treatment_command = -1;
+    do
     {
         printf("> ");
-        if (fgets(command, MAX_SIZE, stdin) ){
-            treatment_command(command);
+        if (fgets(command, MAX_SIZE_COMMAND_INPUT, stdin) ){
+            result_treatment_command = treatment_command(command);
         } else {
             perror("Erreur de la fonction");
-            exit(1);
+            result_treatment_command = -1;
         }
         fflush(stdin);
 
-    }
+    }while(!result_treatment_command);
 }
 
-static void treatment_command(char *command)
+static int treatment_command(char *command)
 {
-    if(strcmp(command, "quit\n") == 0)
-        exit(1);
-    else if(comp_match(command) == 0)
+    if(regex_match(command, FLAG_QUIT_APP) == 0)
     {
-        const int size_format_time = strcmp(command, "time\n") == 0 ? 0 : strlen(command) - 6;
+        return -1;
+    }
+    else if(regex_match(command, FLAG_DISPLAY_TIME) == 0)
+    {
+        const int size_format_time = strcmp(command, "time\n") == 0 ? 5 : strlen(command) - 6;
         char *format_time = (char*)calloc(sizeof(char), size_format_time);
-        strncpy(format_time, strcmp(command, "time\n") == 0 ? "" : command + 5 , size_format_time);
-
+        if(format_time == NULL)
+        {
+            perror("calloc() : ");
+            return -1;
+        }
+        strncpy(format_time, strcmp(command, "time\n") == 0 ? "%D %T" : command + 5 , size_format_time);
         now_time(format_time);
 
         free(format_time);
+        return 0;
     }
-    else if(regex_match(command) == 0)
+    else if(regex_match(command, FLAG_SET_TIME) == 0)
     {
         const int size_string = strlen(command) - 4;
         char *new_time = (char*)calloc(sizeof(char), strlen(command) - 4);
+
+        if(new_time == NULL)
+        {
+            perror("calloc() : ");
+            return -1;
+        }
         strncpy(new_time, command + 4, size_string);
 
         set_time(new_time);
+        free(new_time);
+        return 0;
     }
     else
     {
         printf("Error the command or pattern doesn't exist \n");
+        return 0;
     }
 
 }
 
-static int regex_match(char *command) {
+static int regex_match(const char *command, const int flag) {
     regex_t regex;
     int result;
-    result = regcomp(regex, "^set ([0-1][0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$", REG_EXTENDED);
 
-    if (regexec(regex + index_regex, command, 0, NULL, 0) == 0)
+    switch (flag) {
+        case FLAG_DISPLAY_TIME:
+            result = regcomp(&regex, "^time", 0);
+            break;
+        case FLAG_SET_TIME:
+            result = regcomp(&regex, "^set ([0-1][0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$", REG_EXTENDED);
+            break;
+        case FLAG_QUIT_APP:
+            result = regcomp(&regex, "^quit$", 0);
+            break;
+    }
+    if (regexec(&regex, command, 0, NULL, 0) == 0)
         return 0;
 
     return -1;
 }
-/*
-Fonction Obsolète à changer dans l'avenir
-static int comp_match(char *command)
-{
-    int all_result[NB_KIND_OF_FORMAT_DATE];
 
-    *(all_result + 0) = strcmp(command, "time DD/MM/YYYY\n");
-    *(all_result + 1) = strcmp(command, "time DD/MM/YYYY hh:mm:ss\n");
-    *(all_result + 2) = strcmp(command, "time MM/DD/YYYY\n");
-    *(all_result + 3) = strcmp(command, "time MM/DD/YYYY hh:mm:ss\n");
-    *(all_result + 4) = strcmp(command, "time hh:mm:ss\n");
-    *(all_result + 5) = strcmp(command, "time\n");
-
-    int index_regex = 0, error = 0;
-    for(; index_regex < NB_KIND_OF_FORMAT_DATE; index_regex++  )
-    {
-        if(*(all_result + index_regex) == 0)
-        {
-            error = 0;
-            break;
-        }
-        error = -1;
-    }
-    return error == 0 ? 0 : -1;
-}
-*/
 static void now_time(char *format_string)
 {
     size_t size;

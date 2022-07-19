@@ -3,8 +3,7 @@
 //
 #ifndef PRJ_UI_H
 #define PRJ_UI_H
-#define MAX_SIZE 26
-#define NB_KIND_OF_FORMAT_DATE 6
+#define MAX_SIZE_COMMAND_INPUT 32
 extern void loop_command();
 
 /*
