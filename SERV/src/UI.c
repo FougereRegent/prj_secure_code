@@ -67,15 +67,15 @@ static void treatment_command(char *command)
 static int regex_match(char *command) {
     regex_t regex;
     int result;
-    *result = regcomp(regex, "^set ([0-1][0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$", REG_EXTENDED);
+    result = regcomp(regex, "^set ([0-1][0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$", REG_EXTENDED);
 
     if (regexec(regex + index_regex, command, 0, NULL, 0) == 0)
         return 0;
 
     return -1;
 }
-
-/*Fonction Obsolète à changer dans l'avenir*/
+/*
+Fonction Obsolète à changer dans l'avenir
 static int comp_match(char *command)
 {
     int all_result[NB_KIND_OF_FORMAT_DATE];
@@ -99,7 +99,7 @@ static int comp_match(char *command)
     }
     return error == 0 ? 0 : -1;
 }
-
+*/
 static void now_time(char *format_string)
 {
     size_t size;
