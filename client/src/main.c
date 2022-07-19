@@ -14,41 +14,50 @@ typedef struct sockaddr_in6 SOCKADDR_IN6;
 typedef struct sockaddr SOCKADDR;
 typedef struct in_addr IN_ADDR;
 
+int send_message(const char *addr_ip, const int port, const char *format, const size_t taille_msg);
+
 
 int main(int argc, char **argv)
 {
     char addr_ip[LENGHT_ADDR_IP];
-    char format_date[LENGHT_FORMAT_DATE];
+
     int port = 0;
 
-    if(argc == 4)
+    if(argc > 3)
     {
         const size_t size_string_addr_ip = strlen(argv[1]) <= LENGHT_ADDR_IP ? strlen(argv[1]) : LENGHT_ADDR_IP;
-        const size_t size_string_format_date = strlen(argv[3]) <= LENGHT_FORMAT_DATE ? strlen(argv[3]) : LENGHT_FORMAT_DATE;
+        size_t size_string_format_date = 0;
+        int index;
+
+        for(index = 3; index < argc; index++)
+        {
+            size_string_format_date += strlen(argv[index]);
+        }
+        size_string_format_date += argc - 3;
+
+        char *format_date = (char*)calloc(sizeof(char), size_string_format_date);
+        if(format_date == NULL)
+        {
+            perror("calloc() : ");
+            return -1;
+        }
 
         strncpy(addr_ip, argv[1], size_string_addr_ip);
-        strncpy(format_date, argv[3], size_string_format_date);
+        for(index = 3; index < argc; index++)
+        {
+            strncat(format_date, argv[index], strlen(argv[index]));
+            strncat(format_date, " ", 1);
+        }
+
+        format_date[size_string_format_date -1 ] = '\0';
 
         addr_ip[LENGHT_ADDR_IP-1] = '\0';
-        format_date[LENGHT_FORMAT_DATE-1] = '\0';
 
         port = atoi(argv[2]);
-
-
-    }
-    else if(argc == 5)
-    {
-        const size_t size_string_addr_ip = strlen(argv[1]) <= LENGHT_ADDR_IP ? strlen(argv[1]) : LENGHT_ADDR_IP;
-
-        strncpy(addr_ip, argv[1],size_string_addr_ip );
-        strncpy(format_date, argv[3], 10);
-        strncat(format_date, " ", 1);
-        strncat(format_date, argv[4], 9);
-        addr_ip[LENGHT_ADDR_IP - 1] = '\0';
-
-        port = atoi(argv[2]);
-
         printf("%s\n", format_date);
+        send_message(addr_ip, port, format_date, size_string_format_date);
+        free(format_date);
+
     }
     else
     {
@@ -63,21 +72,10 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
-    switch(send_message(addr_ip, port, format_date)){
-        case 0:
-            break;
-        case 2:
-            break;
-        case 3:
-            break;
-        default:
-            break;
-    }
-
     return EXIT_SUCCESS;
 }
 
-int send_message(const char *addr_ip, const int port, const char *format)
+int send_message(const char *addr_ip, const int port, const char *format, const size_t taille_msg)
 {
     SOCKET sock  = socket(AF_INET, SOCK_STREAM, 0);
     SOCKADDR_IN addr = {
@@ -85,7 +83,7 @@ int send_message(const char *addr_ip, const int port, const char *format)
             .sin_port = htons(port)
     };
 
-    char recv_data[30];
+    char recv_data[taille_msg];
     int n = 0;
 
     if(inet_pton(AF_INET, addr_ip, &addr.sin_addr) < 0)
@@ -105,19 +103,17 @@ int send_message(const char *addr_ip, const int port, const char *format)
         return -1;
     }
 
-    if(send(sock, format, LENGHT_FORMAT_DATE, 0) == - 1)
+    if(send(sock, format, taille_msg, 0) == - 1)
     {
         perror("send(): ");
         return -1;
     }
 
-    if((n = recv(sock, recv_data, 30, 0)) == -1)
-    {
+    if((n = recv(sock, recv_data, 60, 0)) == -1) {
         perror("recv(): ");
         return -1;
     }
-    recv_data[n] = '\0';
-    printf("%s\n", recv_data);
+    printf("Val : %s\n", recv_data);
 
     return  0;
 }
