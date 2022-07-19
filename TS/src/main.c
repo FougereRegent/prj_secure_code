@@ -15,39 +15,20 @@ void init();
 
 int main(int argc, char **argv)
 {
-    char *date_time_string;
-
     init();
-    switch (argc)
+    if(argc == 2)
     {
-        case 2:
-            date_time_string = (char*) calloc(sizeof(char), strlen(argv[0]) + 1);
-            strcpy(date_time_string, argv[1]);
-            if(set_time(date_time_string) == -1)
-            {
-                if(date_time_string == NULL)
-                    free(date_time_string);
-                return EXIT_FAILURE;
-            }
-            break;
-        case 3:
-            date_time_string = (char*) calloc(sizeof(char), strlen(argv[0]) + strlen(argv[1]) + 2);
-            strcpy(date_time_string, argv[1]);
-            strcat(date_time_string, " ");
-            strcat(date_time_string, argv[2]);
-            if(set_time(date_time_string) == -1)
-            {
-                if(date_time_string == NULL)
-                    free(date_time_string);
-                return EXIT_FAILURE;
-            }
-            break;
-        default:
-            break;
-    }
+        const size_t size_string_date_time_format = strlen(argv[1]) + 1;
+        char *date_time_string = (char*) calloc(sizeof(char), size_string_date_time_format);
 
-    if(date_time_string == NULL)
-        free(date_time_string);
+        if(date_time_string == NULL)
+        {
+                perror("callocl() : ");
+                return EXIT_FAILURE;
+        }
+
+        strncpy(date_time_string, argv[1], size_string_date_time_format);
+    }
     return EXIT_SUCCESS;
 }
 
