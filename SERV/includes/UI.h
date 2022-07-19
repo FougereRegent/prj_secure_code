@@ -7,8 +7,9 @@
 extern void loop_command();
 
 /*
- There are two kind of command, they are describe below :
+ There are 3 kind of command, they are describe below :
     - time -> this request is used to return date in specific format
     - set -> this request is used to set a new date
+    - quit -> this request is used to close the app
 */
 #endif //PRJ_UI_H

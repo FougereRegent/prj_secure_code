@@ -14,7 +14,7 @@
 #define FLAG_QUIT_APP 3
 
 /*Prototype*/
-static int treatment_command(char *command);
+static int treatment_command(const char *command);
 static int comp_match(const char *command);
 static int regex_match(const char *command, const int flag);
 static void now_time(char *format_string);
@@ -40,7 +40,7 @@ void loop_command()
     }while(!result_treatment_command);
 }
 
-static int treatment_command(char *command)
+static int treatment_command(const char *command)
 {
     if(regex_match(command, FLAG_QUIT_APP) == 0)
     {

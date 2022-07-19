@@ -5,7 +5,7 @@
 #ifndef PRJ_SERVER_H
 #define PRJ_SERVER_H
 
-#define RECV_SIZE_MSG 30
+#define RECV_SIZE_MSG 8
 #define ERROR_SOCKET -1
 #define ERROR_RECV -1
 #define ERROR_SEND -1

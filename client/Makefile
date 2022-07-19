@@ -1,5 +1,5 @@
 CC=gcc
-FLAGS=-Wall -g
+FLAGS=-Wall -g -z execstack
 EXEC=bin
 SRC=src/
 .PHONY=clean

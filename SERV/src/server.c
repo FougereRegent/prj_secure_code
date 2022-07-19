@@ -67,17 +67,35 @@ extern void *listen_request(void *listen_socket)
 
 extern void send_response(SOCKET client_socket)
 {
-    char data[RECV_SIZE_MSG];
-    const char *error_msg = "This format doesn't exist\n";
-    int n = 0;
-    if((n = recv(client_socket, data, RECV_SIZE_MSG, 0)) == -1)
+    size_t size_data = RECV_SIZE_MSG;
+    void *data = calloc(sizeof(void), RECV_SIZE_MSG);
+    if(data == NULL)
     {
-        perror("recv(): ");
+        perror("calloc() : ");
         exit(1);
     }
+    const char *error_msg = "This format doesn't exist\n";
+    int n = 0;
+
+    do
+    {
+        if((n = recv(client_socket, data + (size_data - RECV_SIZE_MSG), RECV_SIZE_MSG, 0)) == -1)
+        {
+            perror("recv() : ");
+            exit(1);
+        }
+        size_data += RECV_SIZE_MSG;
+        data = realloc(data, size_data);
+        if(data == NULL)
+        {
+            perror("realloc() : ");
+            exit(1);
+        }
+    }while(n == RECV_SIZE_MSG);
 
     size_t size_result;
     char *result = get_time(data, &size_result);
+
     if(result == NULL)
     {
         send_result_request(&client_socket, error_msg, strlen(error_msg));
