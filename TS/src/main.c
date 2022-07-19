@@ -27,7 +27,11 @@ int main(int argc, char **argv)
         }
 
         strncpy(date_time_string, argv[1], size_string_date_time_format);
-        set_time(date_time_string);
+        if(set_time(date_time_string) < -1)
+        {
+            free(date_time_string);
+            return EXIT_FAILURE;
+        }
         free(date_time_string);
     }
     return EXIT_SUCCESS;
