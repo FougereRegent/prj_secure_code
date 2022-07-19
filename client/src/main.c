@@ -6,7 +6,7 @@
 #include<arpa/inet.h>
 
 #define LENGHT_ADDR_IP 17
-#define LENGHT_FORMAT_DATE 21
+#define RECV_SIZE_MESSAGE 8
 
 typedef int SOCKET;
 typedef struct sockaddr_in SOCKADDR_IN;
@@ -54,7 +54,6 @@ int main(int argc, char **argv)
         addr_ip[LENGHT_ADDR_IP-1] = '\0';
 
         port = atoi(argv[2]);
-        printf("%s\n", format_date);
         send_message(addr_ip, port, format_date, size_string_format_date);
         free(format_date);
 
@@ -83,8 +82,15 @@ int send_message(const char *addr_ip, const int port, const char *format, const 
             .sin_port = htons(port)
     };
 
-    char recv_data[taille_msg];
+    size_t size_recv_data = RECV_SIZE_MESSAGE;
+    char *recv_data = (char*)calloc(sizeof(char), RECV_SIZE_MESSAGE);
     int n = 0;
+
+    if(recv_data == NULL)
+    {
+        perror("calloc() : ");
+        return -1;
+    }
 
     if(inet_pton(AF_INET, addr_ip, &addr.sin_addr) < 0)
     {
@@ -108,12 +114,20 @@ int send_message(const char *addr_ip, const int port, const char *format, const 
         perror("send(): ");
         return -1;
     }
+    do
+    {
+        if((n = recv(sock, recv_data + (size_recv_data - RECV_SIZE_MESSAGE), RECV_SIZE_MESSAGE, 0)) == -1)
+        {
+            perror("recv(): ");
+            free(recv_data);
+            return -1;
+        }
+        size_recv_data += n;
+        recv_data = (char*)realloc(recv_data, size_recv_data);
 
-    if((n = recv(sock, recv_data, 60, 0)) == -1) {
-        perror("recv(): ");
-        return -1;
-    }
-    printf("Val : %s\n", recv_data);
+    } while(n == RECV_SIZE_MESSAGE);
 
+    printf("%s\n", recv_data);
+    free(recv_data);
     return  0;
 }

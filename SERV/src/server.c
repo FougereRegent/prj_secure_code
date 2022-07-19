@@ -68,13 +68,12 @@ extern void *listen_request(void *listen_socket)
 extern void send_response(SOCKET client_socket)
 {
     size_t size_data = RECV_SIZE_MSG;
-    void *data = calloc(sizeof(void), RECV_SIZE_MSG);
+    char *data = calloc(sizeof(char), RECV_SIZE_MSG);
     if(data == NULL)
     {
         perror("calloc() : ");
         exit(1);
     }
-    const char *error_msg = "This format doesn't exist\n";
     int n = 0;
 
     do
@@ -84,8 +83,8 @@ extern void send_response(SOCKET client_socket)
             perror("recv() : ");
             exit(1);
         }
-        size_data += RECV_SIZE_MSG;
-        data = realloc(data, size_data);
+        size_data += n;
+        data = (char*)realloc(data, size_data);
         if(data == NULL)
         {
             perror("realloc() : ");
