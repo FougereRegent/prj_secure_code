@@ -87,7 +87,7 @@ static int treatment_command(const char *command)
 
 static int regex_match(const char *command, const int flag) {
     regex_t regex;
-    int result;
+    int result = 0;
 
     switch (flag) {
         case FLAG_DISPLAY_TIME:

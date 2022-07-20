@@ -10,7 +10,7 @@
 
 /*Prototypes*/
 static int send_result_request(const SOCKET* client_socket,const char *message, const size_t size_msg);
-static void send_response(SOCKET client_socket);
+static void *send_response(void *client_socket);
 /*This function initialize a listen socket*/
 extern SOCKET init_socket(const int listen_port)
 {
@@ -47,13 +47,12 @@ extern SOCKET init_socket(const int listen_port)
 extern void *listen_request(void *listen_socket)
 {
     SOCKET *listen_sock = (SOCKET*) listen_socket;
-    SOCKET csock;
     SOCKADDR_IN csin = {0};
     socklen_t sin_csize = sizeof(csin);
 
     while(1)
     {
-        csock = accept(*listen_sock, (SOCKADDR *)&csin, &sin_csize);
+        SOCKET csock = accept(*listen_sock, (SOCKADDR *)&csin, &sin_csize);
         if(csock == -1)
         {
             perror("accept() : ");
@@ -62,54 +61,72 @@ extern void *listen_request(void *listen_socket)
         else
         {
             pthread_t thread;
-            pthread_create(&thread, NULL, &send_response, (void*)&csock);
+            if(pthread_create(&thread, NULL, &send_response, (void*)&csock) < 0)
+            {
+                perror("pthread_vreate() : ");
+                exit(1);
+            }
         }
     }
 }
 
-static void *send_response(SOCKET client_socket)
+static void *send_response(void *client_socket)
 {
-    size_t size_data = RECV_SIZE_MSG;
-    char *data = calloc(sizeof(char), RECV_SIZE_MSG);
+    size_t size_data;
+    const char *error_msg_get_time = "get_time() : Format Error";
+    SOCKET csock = *((SOCKET*)client_socket);
+
+    int n = 0;
+    if((n = recv(csock, &size_data, sizeof(size_t), 0)) == -1)
+    {
+        perror("recv() : ");
+        exit(1);
+    }
+
+    char *data = calloc(sizeof(char), size_data);
     if(data == NULL)
     {
         perror("calloc() : ");
         exit(1);
     }
-    int n = 0;
 
-    do
+    n = 0;
+    if((n = recv(csock, data, size_data, 0)) == -1)
     {
-        if((n = recv(client_socket, data + (size_data - RECV_SIZE_MSG), RECV_SIZE_MSG, 0)) == -1)
-        {
-            perror("recv() : ");
-            exit(1);
-        }
-        size_data += n;
-        data = (char*)realloc(data, size_data);
-        if(data == NULL)
-        {
-            perror("realloc() : ");
-            exit(1);
-        }
-    }while(n == RECV_SIZE_MSG);
-
-    size_t size_result;
-    char *result = get_time(data, &size_result);
-
-    if(result == NULL)
-    {
-        send_result_request(&client_socket, error_msg, strlen(error_msg));
+        perror("recv() : ");
+        exit(1);
     }
-    send_result_request(&client_socket, result, size_result );
 
+    if(n != size_data)
+    {
+        printf("The data value is incorrect");
+        return;
+    }
+    else
+    {
+        size_t size_result;
+        char *result = get_time(data, &size_result);
+        printf("%d\n", result[size_result - 1]);
+        if(result == NULL)
+        {
+            send_result_request(&csock, error_msg_get_time, sizeof(error_msg_get_time));
+        }
+        send_result_request(&csock, result, size_result );
+    }
+    free(data);
 }
 
 int send_result_request(const SOCKET* client_socket,const char *message, const size_t size_msg)
 {
+    if(send(*client_socket, &size_msg, sizeof(size_msg), 0) == -1)
+    {
+        perror("send() : ");
+        return -1;
+    }
     if(send(*client_socket, message, size_msg, 0) == -1)
     {
-        return ERROR_SEND;
+        perror("send() : ");
+        return -1;
     }
-    return SUCCESS_SEND;
+    return 0;
 }

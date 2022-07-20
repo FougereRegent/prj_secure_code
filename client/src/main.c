@@ -82,16 +82,6 @@ int send_message(const char *addr_ip, const int port, const char *format, const 
             .sin_port = htons(port)
     };
 
-    size_t size_recv_data = RECV_SIZE_MESSAGE;
-    char *recv_data = (char*)calloc(sizeof(char), RECV_SIZE_MESSAGE);
-    int n = 0;
-
-    if(recv_data == NULL)
-    {
-        perror("calloc() : ");
-        return -1;
-    }
-
     if(inet_pton(AF_INET, addr_ip, &addr.sin_addr) < 0)
     {
         perror("inet_pton(): ");
@@ -108,26 +98,43 @@ int send_message(const char *addr_ip, const int port, const char *format, const 
         perror("connect(): ");
         return -1;
     }
+    if(send(sock, &taille_msg, sizeof(size_t), 0) == -1)
+    {
+        perror("send() : ");
+        return -1;
+    }
 
     if(send(sock, format, taille_msg, 0) == - 1)
     {
         perror("send(): ");
         return -1;
     }
-    do
-    {
-        if((n = recv(sock, recv_data + (size_recv_data - RECV_SIZE_MESSAGE), RECV_SIZE_MESSAGE, 0)) == -1)
-        {
-            perror("recv(): ");
-            free(recv_data);
-            return -1;
-        }
-        size_recv_data += n;
-        recv_data = (char*)realloc(recv_data, size_recv_data);
 
-    } while(n == RECV_SIZE_MESSAGE);
+    size_t size_recv_data;
+    int n = 0;
+
+
+    if((n = recv(sock, &size_recv_data, sizeof(size_t), 0)) == -1)
+    {
+        perror("recv() : ");
+        return -1;
+    }
+
+    char *recv_data = (char*)calloc(sizeof(char), size_recv_data);
+    if(recv_data == NULL)
+    {
+        perror("calloc() : ");
+        return -1;
+    }
+    n = 0;
+    if((n = recv(sock, recv_data, size_recv_data, 0)) == -1) {
+        perror("recv(): ");
+        free(recv_data);
+        return -1;
+    }
 
     printf("%s\n", recv_data);
     free(recv_data);
+    close(sock);
     return  0;
 }
