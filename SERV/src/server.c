@@ -4,12 +4,13 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <pthread.h>
 #include "server.h"
 #include "treatment_time.h"
 
 /*Prototypes*/
-int send_result_request(const SOCKET* client_socket,const char *message, const size_t size_msg);
-
+static int send_result_request(const SOCKET* client_socket,const char *message, const size_t size_msg);
+static void send_response(SOCKET client_socket);
 /*This function initialize a listen socket*/
 extern SOCKET init_socket(const int listen_port)
 {
@@ -60,12 +61,13 @@ extern void *listen_request(void *listen_socket)
         }
         else
         {
-            send_response(csock);
+            pthread_t thread;
+            pthread_create(&thread, NULL, &send_response, (void*)&csock);
         }
     }
 }
 
-extern void send_response(SOCKET client_socket)
+static void *send_response(SOCKET client_socket)
 {
     size_t size_data = RECV_SIZE_MSG;
     char *data = calloc(sizeof(char), RECV_SIZE_MSG);

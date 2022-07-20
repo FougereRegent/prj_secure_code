@@ -6,11 +6,6 @@
 #define PRJ_SERVER_H
 
 #define RECV_SIZE_MSG 8
-#define ERROR_SOCKET -1
-#define ERROR_RECV -1
-#define ERROR_SEND -1
-#define SUCCESS_SEND 0
-#define ERROR_BIND -1
 
 typedef int SOCKET;
 typedef struct sockaddr_in SOCKADDR_IN;
@@ -20,5 +15,5 @@ typedef struct in_addr IN_ADDR;
 
 extern SOCKET init_socket(const int listen_port);
 extern void *listen_request(void *listen_sock);
-extern void send_response(SOCKET client_socket);
+
 #endif //PRJ_SERVER_H
