@@ -15,7 +15,6 @@
 
 /*Prototype*/
 static int treatment_command(const char *command);
-static int comp_match(const char *command);
 static int regex_match(const char *command, const int flag);
 static void now_time(char *format_string);
 static void clear_stdin();
@@ -48,14 +47,14 @@ static int treatment_command(const char *command)
     }
     else if(regex_match(command, FLAG_DISPLAY_TIME) == 0)
     {
-        const int size_format_time = strcmp(command, "time\n") == 0 ? 5 : strlen(command) - 5;
+        const int size_format_time = strcmp(command, "time\n") == 0 ? 6 : strlen(command) - 5;
         char *format_time = (char*)calloc(sizeof(char), size_format_time);
         if(format_time == NULL)
         {
             perror("calloc() : ");
             return -1;
         }
-        strncpy(format_time, strcmp(command, "time\n") == 0 ? "%D %T" : command + 5 , size_format_time);
+        strncpy(format_time, strcmp(command, "time\n") == 0 ? "%D %T\n" : command + 5 , size_format_time);
         now_time(format_time);
 
         free(format_time);
@@ -94,13 +93,13 @@ static int regex_match(const char *command, const int flag) {
             result = regcomp(&regex, "^time", 0);
             break;
         case FLAG_SET_TIME:
-            result = regcomp(&regex, "^set ([0-1][0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$", REG_EXTENDED);
+            result = regcomp(&regex, "^set ([0-1][0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])\n?$", REG_EXTENDED);
             break;
         case FLAG_QUIT_APP:
             result = regcomp(&regex, "^quit", 0);
             break;
     }
-    if (regexec(&regex, command, 0, NULL, 0) == 0)
+    if (regexec(&regex, command, 0, NULL, 0) == 0 && result == 0)
         return 0;
 
     return -1;
@@ -112,7 +111,7 @@ static void now_time(char *format_string)
     char *result_format = get_time(format_string, &size);
     if(result_format != NULL)
     {
-        printf("%s\n", result_format);
+        printf("%s", result_format);
         free(result_format);
     }
 }

@@ -40,7 +40,6 @@ extern char* get_time(const char* format_time, size_t *size_result)
         perror("realloc() : ");
         return NULL;
     }
-    result[*size_result - 1] = '\0';
     return result;
 }
 

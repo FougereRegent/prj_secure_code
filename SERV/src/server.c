@@ -100,13 +100,11 @@ static void *send_response(void *client_socket)
     if(n != size_data)
     {
         printf("The data value is incorrect");
-        return;
     }
     else
     {
         size_t size_result;
         char *result = get_time(data, &size_result);
-        printf("%d\n", result[size_result - 1]);
         if(result == NULL)
         {
             send_result_request(&csock, error_msg_get_time, sizeof(error_msg_get_time));
@@ -114,6 +112,7 @@ static void *send_response(void *client_socket)
         send_result_request(&csock, result, size_result );
     }
     free(data);
+    return NULL;
 }
 
 int send_result_request(const SOCKET* client_socket,const char *message, const size_t size_msg)

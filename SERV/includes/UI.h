@@ -3,7 +3,7 @@
 //
 #ifndef PRJ_UI_H
 #define PRJ_UI_H
-#define MAX_SIZE_COMMAND_INPUT 32
+#define MAX_SIZE_COMMAND_INPUT 64
 extern void loop_command();
 
 /*
