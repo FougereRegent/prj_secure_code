@@ -11,6 +11,9 @@
 /*Prototypes*/
 static int send_result_request(const SOCKET* client_socket,const char *message, const size_t size_msg);
 static void *send_response(void *client_socket);
+static char* convert_byte_to_char(const uint8_t* array_bytes, const size_t size);
+
+
 /*This function initialize a listen socket*/
 extern SOCKET init_socket(const int listen_port)
 {
@@ -74,29 +77,44 @@ static void *send_response(void *client_socket)
 {
     size_t size_data;
     const char *error_msg_get_time = "get_time() : Format Error";
+    uint8_t *data = (uint8_t*) malloc(sizeof(size_t));
     SOCKET csock = *((SOCKET*)client_socket);
 
     int n = 0;
-    if((n = recv(csock, &size_data, sizeof(size_t), 0)) == -1)
-    {
-        perror("recv() : ");
-        exit(1);
-    }
+    int shift_size_data;
 
-    char *data = calloc(sizeof(char), size_data);
     if(data == NULL)
     {
         perror("calloc() : ");
         exit(1);
     }
 
-    n = 0;
-    if((n = recv(csock, data, size_data, 0)) == -1)
+    if((n = recv(csock, data, sizeof(size_t), 0)) == -1)
     {
         perror("recv() : ");
         exit(1);
     }
 
+    for(shift_size_data = 0; shift_size_data < sizeof(size_t); shift_size_data += 8)
+    {
+        size_data += (data[shift_size_data % 8] << shift_size_data);
+    }
+
+    if(size_data > sizeof(size_t))
+    {
+        data = (uint8_t*) realloc(data, size_data);
+        if(data == NULL)
+        {
+            perror("realloc() : ");
+            exit(1);
+        }
+    }
+
+    if((n = recv(csock, data, size_data, 0)) == -1)
+    {
+        perror("recv() : ");
+        exit(1);
+    }
     if(n != size_data)
     {
         printf("The data value is incorrect");
@@ -104,13 +122,17 @@ static void *send_response(void *client_socket)
     else
     {
         size_t size_result;
-        char *result = get_time(data, &size_result);
+        char *string_data = convert_byte_to_char(data, size_data);
+        char *result = get_time(string_data, &size_result);
         if(result == NULL)
         {
             send_result_request(&csock, error_msg_get_time, sizeof(error_msg_get_time));
         }
         send_result_request(&csock, result, size_result );
+
+        free(string_data);
     }
+
     free(data);
     return NULL;
 }
@@ -128,4 +150,21 @@ int send_result_request(const SOCKET* client_socket,const char *message, const s
         return -1;
     }
     return 0;
+}
+
+static char* convert_byte_to_char(const uint8_t* array_bytes, const size_t size)
+{
+    char *string = (char*)calloc(sizeof (char), size);
+    if(string == NULL)
+    {
+        perror("calloc() : ");
+        return NULL;
+    }
+
+    size_t index;
+    for(index = 0; index < size; index++)
+    {
+        string[index] = array_bytes[index];
+    }
+    return string;
 }
