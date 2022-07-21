@@ -1,5 +1,5 @@
 CC=gcc
-FLAGS=-Wall -g -Wunused-function -z execstack
+FLAGS=-Wall -g -Wunused-function
 SRC=src/
 EXEC=ts
 
