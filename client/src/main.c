@@ -14,7 +14,9 @@ typedef struct sockaddr_in6 SOCKADDR_IN6;
 typedef struct sockaddr SOCKADDR;
 typedef struct in_addr IN_ADDR;
 
-int send_message(const char *addr_ip, const int port, const char *format, const size_t taille_msg);
+static int send_message(const char *addr_ip, const int port, const char *format, const size_t taille_msg);
+static char* convert_byte_to_char(const uint8_t* array_bytes, const size_t size);
+
 
 
 int main(int argc, char **argv)
@@ -35,28 +37,18 @@ int main(int argc, char **argv)
         }
         size_string_format_date += argc - 3;
 
-        char *format_date = (char*)calloc(sizeof(char), size_string_format_date);
-        if(format_date == NULL)
+        snprintf(addr_ip, size_string_addr_ip, "%s", argv[1]);
+
+        for(index = 4; index < argc; index++)
         {
-            perror("calloc() : ");
-            return -1;
+            argv[index - 1][strlen(argv[index - 1])] = ' ';
         }
 
-        strncpy(addr_ip, argv[1], size_string_addr_ip);
-        for(index = 3; index < argc; index++)
-        {
-            strncat(format_date, argv[index], strlen(argv[index]));
-            strncat(format_date, " ", 1);
-        }
-
-        format_date[size_string_format_date -1 ] = '\0';
 
         addr_ip[LENGHT_ADDR_IP-1] = '\0';
 
         port = atoi(argv[2]);
-        send_message(addr_ip, port, format_date, size_string_format_date);
-        free(format_date);
-
+        send_message(addr_ip, port, argv[3], size_string_format_date);
     }
     else
     {
@@ -74,7 +66,7 @@ int main(int argc, char **argv)
     return EXIT_SUCCESS;
 }
 
-int send_message(const char *addr_ip, const int port, const char *format, const size_t taille_msg)
+static int send_message(const char *addr_ip, const int port, const char *format, const size_t taille_msg)
 {
     SOCKET sock  = socket(AF_INET, SOCK_STREAM, 0);
     SOCKADDR_IN addr = {
@@ -110,31 +102,68 @@ int send_message(const char *addr_ip, const int port, const char *format, const 
         return -1;
     }
 
-    size_t size_recv_data;
+    size_t size_recv_data = 0;
     int n = 0;
+    int shift_size_data;
+    uint8_t *data = (uint8_t*) malloc(sizeof(size_t));
 
+    if(data == NULL)
+    {
+        perror("malloc() : ");
+        return -1;
+    }
 
-    if((n = recv(sock, &size_recv_data, sizeof(size_t), 0)) == -1)
+    if((n = recv(sock, data, sizeof(size_t), 0)) == -1)
     {
         perror("recv() : ");
+        free(data);
         return -1;
     }
 
-    char *recv_data = (char*)calloc(sizeof(char), size_recv_data);
-    if(recv_data == NULL)
+    for(shift_size_data = 0; shift_size_data < sizeof(size_t); shift_size_data += 8)
     {
-        perror("calloc() : ");
-        return -1;
+        size_recv_data += (data[shift_size_data % 8] << shift_size_data);
     }
-    n = 0;
-    if((n = recv(sock, recv_data, size_recv_data, 0)) == -1) {
+
+    if(size_recv_data > sizeof(size_t))
+    {
+        data = (uint8_t*) realloc(data, 100);
+        if(data == NULL)
+        {
+            perror("realloc() : ");
+            return -1;
+        }
+    }
+
+    if((n = recv(sock, data, size_recv_data, 0)) == -1) {
         perror("recv(): ");
-        free(recv_data);
+        free(data);
         return -1;
     }
+
+    char *recv_data = convert_byte_to_char(data, size_recv_data);
 
     printf("%s\n", recv_data);
+
+    free(data);
     free(recv_data);
-    close(sock);
+
     return  0;
+}
+
+static char* convert_byte_to_char(const uint8_t* array_bytes, const size_t size)
+{
+    char *string = (char*)calloc(sizeof (char), size);
+    if(string == NULL)
+    {
+        perror("calloc() : ");
+        return NULL;
+    }
+
+    size_t index;
+    for(index = 0; index < size; index++)
+    {
+        string[index] = array_bytes[index];
+    }
+    return string;
 }

@@ -77,7 +77,7 @@ static void *send_response(void *client_socket)
 {
     size_t size_data;
     const char *error_msg_get_time = "get_time() : Format Error";
-    uint8_t *data = (uint8_t*) malloc(sizeof(size_t));
+    uint8_t *data = (uint8_t*) calloc(1,sizeof(size_t));
     SOCKET csock = *((SOCKET*)client_socket);
 
     int n = 0;
@@ -139,7 +139,7 @@ static void *send_response(void *client_socket)
 
 int send_result_request(const SOCKET* client_socket,const char *message, const size_t size_msg)
 {
-    if(send(*client_socket, &size_msg, sizeof(size_msg), 0) == -1)
+    if(send(*client_socket, &size_msg, sizeof(size_t), 0) == -1)
     {
         perror("send() : ");
         return -1;
@@ -154,7 +154,6 @@ int send_result_request(const SOCKET* client_socket,const char *message, const s
 
 static char* convert_byte_to_char(const uint8_t* array_bytes, const size_t size)
 {
-    char *string = (char*)calloc(sizeof (char), size);
     if(string == NULL)
     {
         perror("calloc() : ");

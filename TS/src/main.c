@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <time.h>
 #include <sys/time.h>
-#include <regex.h>
 #include <string.h>
 #include <errno.h>
 
@@ -33,7 +32,6 @@ int main(int argc, char **argv)
     }
     return EXIT_SUCCESS;
 }
-
 
 int set_time(const char *format_time)
 {
