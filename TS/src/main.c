@@ -23,9 +23,8 @@ int main(int argc, char **argv)
         {
                 return EXIT_FAILURE;
         }
-
-        snprintf(date_time_string, size_string_date_time_format, "%s %s", argv[1], argv[2]);
-        if(set_time(date_time_string) < 0)
+        argv[1][strlen(argv[1])] = ' ';
+        if(set_time(argv[1]) < 0)
         {
             free(date_time_string);
             return EXIT_FAILURE;
