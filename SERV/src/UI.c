@@ -47,14 +47,14 @@ static int treatment_command(const char *command)
     }
     else if(regex_match(command, FLAG_DISPLAY_TIME) == 0)
     {
-        const int size_format_time = strcmp(command, "time\n") == 0 ? 6 : strlen(command) - 5;
+        const int size_format_time = strcmp(command, "time\n") == 0 ? 6 : strlen(command) - 4;
         char *format_time = (char*)calloc(sizeof(char), size_format_time);
         if(format_time == NULL)
         {
             perror("calloc() : ");
             return -1;
         }
-        strncpy(format_time, strcmp(command, "time\n") == 0 ? "%D %T\n" : command + 5 , size_format_time);
+        snprintf(format_time, size_format_time, "%s", strcmp(command, "time\n") == 0 ? "%D %T" : command + 4);
         now_time(format_time);
 
         free(format_time);
@@ -70,7 +70,7 @@ static int treatment_command(const char *command)
             perror("calloc() : ");
             return -1;
         }
-        strncpy(new_time, command + 4, size_string);
+        snprintf(new_time, size_string, command + 4,"%s",  size_string);
 
         set_time(new_time);
         free(new_time);
@@ -96,7 +96,7 @@ static int regex_match(const char *command, const int flag) {
             result = regcomp(&regex, "^set ([0-1][0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])\n?$", REG_EXTENDED);
             break;
         case FLAG_QUIT_APP:
-            result = regcomp(&regex, "^quit", 0);
+            result = regcomp(&regex, "^quit\n?$", REG_EXTENDED);
             break;
     }
     if (regexec(&regex, command, 0, NULL, 0) == 0 && result == 0)
@@ -111,7 +111,7 @@ static void now_time(char *format_string)
     char *result_format = get_time(format_string, &size);
     if(result_format != NULL)
     {
-        printf("%s", result_format);
+        printf("%s\n", result_format);
         free(result_format);
     }
 }

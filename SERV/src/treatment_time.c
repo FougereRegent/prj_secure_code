@@ -45,10 +45,11 @@ extern char* get_time(const char* format_time, size_t *size_result)
 
 extern int set_time(const char *time)
 {
-    char *path_of_file = "/bin/NC/ts ";
-    char *string = (char*)calloc(sizeof(char), strlen(time) + strlen(path_of_file));
-    strcat(string, path_of_file);
-    strcat(string, time);
+    const char *path_of_file = "/bin/NC/ts";
+    const size_t size_of_string = strlen(time) + strlen(path_of_file) + 2;
+    char *string = (char*)calloc(sizeof(char), size_of_string);
+
+    snprintf(string, size_of_string, "%s %s", path_of_file, time);
 
     if(!system(string))
     {
