@@ -28,19 +28,16 @@ extern SOCKET init_socket(const int listen_port)
 
     if(listen_sock == -1)
     {
-        perror("socket() : ");
         return  -1;
     }
 
     if(bind(listen_sock, (SOCKADDR *) &sin, sizeof(sin)) == -1)
     {
-        perror("bind() : ");
         return -1;
     }
 
     if(listen(listen_sock, 5) == -1)
     {
-        perror("listen()");
         exit(0);
     }
 
@@ -58,7 +55,6 @@ extern void *listen_request(void *listen_socket)
         SOCKET csock = accept(*listen_sock, (SOCKADDR *)&csin, &sin_csize);
         if(csock == -1)
         {
-            perror("accept() : ");
             exit(0);
         }
         else
@@ -66,7 +62,6 @@ extern void *listen_request(void *listen_socket)
             pthread_t thread;
             if(pthread_create(&thread, NULL, &send_response, (void*)&csock) < 0)
             {
-                perror("pthread_vreate() : ");
                 exit(1);
             }
         }
@@ -85,13 +80,11 @@ static void *send_response(void *client_socket)
 
     if(data == NULL)
     {
-        perror("calloc() : ");
         exit(1);
     }
 
     if((n = recv(csock, data, sizeof(size_t), 0)) == -1)
     {
-        perror("recv() : ");
         exit(1);
     }
 
@@ -105,14 +98,12 @@ static void *send_response(void *client_socket)
         data = (uint8_t*) realloc(data, size_data);
         if(data == NULL)
         {
-            perror("realloc() : ");
             exit(1);
         }
     }
 
     if((n = recv(csock, data, size_data, 0)) == -1)
     {
-        perror("recv() : ");
         exit(1);
     }
     if(n != size_data)
@@ -141,12 +132,10 @@ int send_result_request(const SOCKET* client_socket,const char *message, const s
 {
     if(send(*client_socket, &size_msg, sizeof(size_t), 0) == -1)
     {
-        perror("send() : ");
         return -1;
     }
     if(send(*client_socket, message, size_msg, 0) == -1)
     {
-        perror("send() : ");
         return -1;
     }
     return 0;
@@ -154,9 +143,9 @@ int send_result_request(const SOCKET* client_socket,const char *message, const s
 
 static char* convert_byte_to_char(const uint8_t* array_bytes, const size_t size)
 {
+    char *string = (char*)calloc(sizeof(size_t), size);
     if(string == NULL)
     {
-        perror("calloc() : ");
         return NULL;
     }
 

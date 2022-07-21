@@ -33,7 +33,6 @@ void loop_command()
             }
             result_treatment_command = treatment_command(command);
         } else {
-            perror("Erreur de la fonction");
             result_treatment_command = -1;
         }
     }while(!result_treatment_command);
@@ -51,7 +50,6 @@ static int treatment_command(const char *command)
         char *format_time = (char*)calloc(sizeof(char), size_format_time);
         if(format_time == NULL)
         {
-            perror("calloc() : ");
             return -1;
         }
         snprintf(format_time, size_format_time, "%s", strcmp(command, "time\n") == 0 ? "%D %T" : command + 4);
@@ -67,7 +65,6 @@ static int treatment_command(const char *command)
 
         if(new_time == NULL)
         {
-            perror("calloc() : ");
             return -1;
         }
         snprintf(new_time, size_string, command + 4,"%s",  size_string);

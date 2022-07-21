@@ -17,7 +17,6 @@ extern char* get_time(const char* format_time, size_t *size_result)
     char *result = (char*) calloc(sizeof(char), *size_result);
     if (result == NULL)
     {
-        perror("calloc() : ");
         return NULL;
     }
 
@@ -29,7 +28,6 @@ extern char* get_time(const char* format_time, size_t *size_result)
         *size_result += 16;
         if((result = realloc(result, *size_result)) == NULL)
         {
-            perror("realloc() : ");
             return NULL;
         }
     }
@@ -37,7 +35,6 @@ extern char* get_time(const char* format_time, size_t *size_result)
     *size_result = result_strftime + 1;
     if((result = realloc(result, *size_result)) == NULL)
     {
-        perror("realloc() : ");
         return NULL;
     }
     return result;

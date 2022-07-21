@@ -76,29 +76,24 @@ static int send_message(const char *addr_ip, const int port, const char *format,
 
     if(inet_pton(AF_INET, addr_ip, &addr.sin_addr) < 0)
     {
-        perror("inet_pton(): ");
         return -1;
     }
     if(sock == -1)
     {
-        perror("socket(): ");
         return -1;
     }
 
     if(connect(sock , (SOCKADDR*) &addr, sizeof(addr)) == -1)
     {
-        perror("connect(): ");
         return -1;
     }
     if(send(sock, &taille_msg, sizeof(size_t), 0) == -1)
     {
-        perror("send() : ");
         return -1;
     }
 
     if(send(sock, format, taille_msg, 0) == - 1)
     {
-        perror("send(): ");
         return -1;
     }
 
@@ -109,13 +104,11 @@ static int send_message(const char *addr_ip, const int port, const char *format,
 
     if(data == NULL)
     {
-        perror("malloc() : ");
         return -1;
     }
 
     if((n = recv(sock, data, sizeof(size_t), 0)) == -1)
     {
-        perror("recv() : ");
         free(data);
         return -1;
     }
@@ -130,13 +123,11 @@ static int send_message(const char *addr_ip, const int port, const char *format,
         data = (uint8_t*) realloc(data, 100);
         if(data == NULL)
         {
-            perror("realloc() : ");
             return -1;
         }
     }
 
     if((n = recv(sock, data, size_recv_data, 0)) == -1) {
-        perror("recv(): ");
         free(data);
         return -1;
     }
@@ -156,7 +147,6 @@ static char* convert_byte_to_char(const uint8_t* array_bytes, const size_t size)
     char *string = (char*)calloc(sizeof (char), size);
     if(string == NULL)
     {
-        perror("calloc() : ");
         return NULL;
     }
 
