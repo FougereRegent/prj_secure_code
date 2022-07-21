@@ -37,31 +37,9 @@ int main(int argc, char **argv)
     return EXIT_SUCCESS;
 }
 
-int check_format_time(const char *format_date)
-{
-    regex_t regex_check_format_time;
-
-    if(regcomp(&regex_check_format_time, "^([0-1][0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$", REG_EXTENDED) != 0)
-    {
-        printf("The regular expression doesn't compile\n");
-        return -1;
-    }
-
-    if(regexec(&regex_check_format_time, format_date, 0, NULL, 0) == 0)
-    {
-        return 0;
-    }
-    return -1;
-}
 
 int set_time(const char *format_time)
 {
-    /*
-    if(check_format_time(format_time) < 0) {
-        printf("Format error, use this format hh:mm:ss\n");
-        return -1;
-    }
-    */
     time_t t = time(NULL);
     struct tm *time;
 
