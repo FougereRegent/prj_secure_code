@@ -21,7 +21,6 @@ int main(int argc, char **argv)
 
         if(date_time_string == NULL)
         {
-                perror("callocl() : ");
                 return EXIT_FAILURE;
         }
 
@@ -29,7 +28,6 @@ int main(int argc, char **argv)
         if(set_time(date_time_string) < 0)
         {
             free(date_time_string);
-            printf("Error\n");
             return EXIT_FAILURE;
         }
         free(date_time_string);
@@ -40,15 +38,14 @@ int main(int argc, char **argv)
 
 int set_time(const char *format_time)
 {
-    time_t t = time(NULL);
-    struct tm *time;
+    struct tm time;
 
-    if(strptime(format_time, "%d/%m/%Y %H:%M:%S", time) == NULL)
+    if(strptime(format_time, "%d/%m/%Y %H:%M:%S", &time) == NULL)
     {
         return -1;
     }
 
-    struct timeval new_time = { mktime(time), 0 };
+    struct timeval new_time = { mktime(&time), 0 };
 
     if(settimeofday(&new_time, 0) == 0)
     {
