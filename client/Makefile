@@ -1,5 +1,5 @@
 CC=gcc
-FLAGS=-Wall -g
+FLAGS=-Wall
 EXEC=bin
 SRC=src/
 .PHONY=clean

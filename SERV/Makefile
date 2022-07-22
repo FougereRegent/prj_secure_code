@@ -1,5 +1,5 @@
 CC=gcc
-FLAGS=-Wall -g -Wunused-function
+FLAGS=-Wall
 INC=-I includes/
 SRC= src/
 EXEC=bin
