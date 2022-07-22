@@ -8,7 +8,7 @@ all: $(EXEC)
 	make clean
 
 $(EXEC): $(SRC)main.o
-	$(CC) $^ -o $@
+	$(CC) $^ -o $@ -lcap
 
 $(SRC)main.o: $(SRC)main.c
 	$(CC) $(FLAGS) -o $@ -c $<
