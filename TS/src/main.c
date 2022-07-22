@@ -62,38 +62,40 @@ void init_cap()
     if(cap_clear_flag(cap, CAP_PERMITTED) == -1)
     {
         cap_free(cap);
-        perror("cap_clear_flag() : ");
         exit(1);
     }
     if(cap_clear_flag(cap, CAP_INHERITABLE) == -1)
     {
         cap_free(cap);
-        perror("cap_clear_flag() : ");
         exit(1);
     }
     if(cap_clear_flag(cap, CAP_EFFECTIVE) == -1)
     {
         cap_free(cap);
-        perror("cap_clear_flag() : ");
         exit(1);
     }
 
     if(cap_set_flag(cap, CAP_PERMITTED, 1, &t, CAP_SET) == -1)
     {
-        perror("cap_set_flag() : ");
+        cap_free(cap);
+        exit(1);
     }
     if(cap_set_flag(cap, CAP_EFFECTIVE, 1, &t, CAP_SET) == -1)
     {
-        perror("cap_set_flag() : ");
+        cap_free(cap);
+        exit(1);
     }
     if(cap_set_flag(cap, CAP_INHERITABLE, 1, &t, CAP_SET) == -1)
     {
-        perror("cap_set_flag() : ");
+        cap_free(cap);
+        exit(1);
     }
 
     if(cap_set_proc(cap) == -1)
     {
         printf("Erreur to set cap\n");
+        cap_free(cap);
+        exit(1);
     }
     cap_free(cap);
 }
