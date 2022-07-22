@@ -7,14 +7,17 @@
 #include "server.h"
 #include "treatment_time.h"
 
+#define DEFAULT_PORT 8080
+
 static void init_cap();
+static int port_config_file();
 
 int main(int argc, char **argv)
 {
     pthread_t thread_server;
 
     init_cap();
-    SOCKET sock = init_socket(8080);
+    SOCKET sock = init_socket(DEFAULT_PORT);
 
     pthread_create(&thread_server, NULL, &listen_request, (void*)&sock);
     loop_command();
