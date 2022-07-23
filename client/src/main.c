@@ -7,7 +7,7 @@
 #include<arpa/inet.h>
 
 #define LENGHT_ADDR_IP 17
-#define RECV_SIZE_MESSAGE 8
+#define SIZE_BUFFER_DATA 2
 
 typedef int SOCKET;
 typedef struct sockaddr_in SOCKADDR_IN;
@@ -16,7 +16,7 @@ typedef struct sockaddr SOCKADDR;
 typedef struct in_addr IN_ADDR;
 
 static int send_message(const char *addr_ip, const int port, const char *format, const size_t taille_msg);
-static char* convert_byte_to_char(const uint8_t* array_bytes, const size_t size);
+static char* convert_byte_to_char(const uint8_t* array_bytes, size_t *size);
 static void init_cap();
 
 
@@ -89,73 +89,102 @@ static int send_message(const char *addr_ip, const int port, const char *format,
     {
         return -1;
     }
-    if(send(sock, &taille_msg, sizeof(size_t), 0) == -1)
-    {
-        return -1;
-    }
 
-    if(send(sock, format, taille_msg, 0) == - 1)
+    uint8_t *test = calloc(sizeof(uint8_t), taille_msg + 1);
+    int i;
+    for(i = 0; i < taille_msg; i++)
+    {
+        test[i] = format[i];
+    }
+    test[taille_msg - 1] = 0xFF;
+    test[taille_msg] = 0xFF;
+
+    if(send(sock, test, taille_msg + 1, 0) == - 1)
     {
         return -1;
     }
 
     size_t size_recv_data = 0;
+    uint8_t *data = (uint8_t*) malloc(size_recv_data);
+    uint8_t *val_recv;
     int n = 0;
-    int shift_size_data;
-    uint8_t *data = (uint8_t*) malloc(sizeof(size_t));
 
-    if(data == NULL)
+    do
     {
-        return -1;
-    }
-
-    if((n = recv(sock, data, sizeof(size_t), 0)) == -1)
-    {
-        free(data);
-        return -1;
-    }
-
-    for(shift_size_data = 0; shift_size_data < sizeof(size_t); shift_size_data += 8)
-    {
-        size_recv_data += (data[shift_size_data % 8] << shift_size_data);
-    }
-
-    if(size_recv_data > sizeof(size_t))
-    {
-        data = (uint8_t*) realloc(data, 100);
-        if(data == NULL)
+        if((n = recv(sock, data, SIZE_BUFFER_DATA, 0)) == -1)
         {
-            return -1;
+            free(data);
+            exit(1);
         }
+        if(val_recv == NULL)
+        {
+            size_recv_data += n;
+            val_recv = (uint8_t*) calloc(1, size_recv_data);
+            if(val_recv == NULL)
+            {
+                return -1;
+            }
+            while(n > 0)
+            {
+                val_recv[n - 1] = data[n - 1];
+                n--;
+            }
+        }
+        else{
+            int index;
+            size_recv_data += n;
+            val_recv = (uint8_t*) realloc(val_recv, size_recv_data);
+            for(index = 0; index < n; index++)
+            {
+                val_recv[size_recv_data - n + index] = data[index];
+            }
+        }
+    }while(val_recv[size_recv_data - 2] != 0xFF || val_recv[size_recv_data - 1] != 0xFF);
+
+    size_recv_data -= 2;
+
+    char *recv_data = convert_byte_to_char(val_recv, &size_recv_data);
+
+    if(recv_data != NULL)
+    {
+        printf("%s\n", recv_data);
     }
-
-    if((n = recv(sock, data, size_recv_data, 0)) == -1) {
-        free(data);
-        return -1;
-    }
-
-    char *recv_data = convert_byte_to_char(data, size_recv_data);
-
-    printf("%s\n", recv_data);
-
     free(data);
     free(recv_data);
 
     return  0;
 }
 
-static char* convert_byte_to_char(const uint8_t* array_bytes, const size_t size)
+static char* convert_byte_to_char(const uint8_t* array_bytes, size_t *size)
 {
-    char *string = (char*)calloc(sizeof (char), size);
+    char *string = (char*)calloc(sizeof(size_t), *size);
     if(string == NULL)
     {
         return NULL;
     }
 
     size_t index;
-    for(index = 0; index < size; index++)
+    for(index = 0; index < *size; index++)
     {
-        string[index] = array_bytes[index];
+        char c = (char)array_bytes[index];
+        if(c >= 0 && c <= 127)
+        {
+            string[index] = (char)array_bytes[index];
+        }
+        else
+        {
+            return NULL;
+        }
+    }
+    if(string[*size - 1] != '\0')
+    {
+        *size += 1;
+        string = realloc(string, *size);
+        if(string == NULL)
+        {
+            return NULL;
+        }
+        string[*size - 1] = '\0';
     }
     return string;
 }

@@ -8,10 +8,11 @@
 #include "server.h"
 #include "treatment_time.h"
 
+#define SIZE_BUFFER_DATA 2
 /*Prototypes*/
 static int send_result_request(const SOCKET* client_socket,const char *message, const size_t size_msg);
 static void *send_response(void *client_socket);
-static char* convert_byte_to_char(const uint8_t* array_bytes, const size_t size);
+static char* convert_byte_to_char(const uint8_t* array_bytes, size_t *size);
 
 
 /*This function initialize a listen socket*/
@@ -70,89 +71,114 @@ extern void *listen_request(void *listen_socket)
 
 static void *send_response(void *client_socket)
 {
-    size_t size_data;
-    const char *error_msg_get_time = "get_time() : Format Error";
-    uint8_t *data = (uint8_t*) calloc(1,sizeof(size_t));
+    size_t size_data = 0;
+    uint8_t *data = (uint8_t*) calloc(1, SIZE_BUFFER_DATA);
+    uint8_t *val_recv;
+
     SOCKET csock = *((SOCKET*)client_socket);
 
     int n = 0;
-    int shift_size_data;
 
     if(data == NULL)
     {
         exit(1);
     }
 
-    if((n = recv(csock, data, sizeof(size_t), 0)) == -1)
+    do
     {
-        exit(1);
-    }
-
-    for(shift_size_data = 0; shift_size_data < sizeof(size_t); shift_size_data += 8)
-    {
-        size_data += (data[shift_size_data % 8] << shift_size_data);
-    }
-
-    if(size_data > sizeof(size_t))
-    {
-        data = (uint8_t*) realloc(data, size_data);
-        if(data == NULL)
+        if((n = recv(csock, data, SIZE_BUFFER_DATA, 0)) == -1)
         {
+            free(data);
             exit(1);
         }
-    }
-
-    if((n = recv(csock, data, size_data, 0)) == -1)
-    {
-        exit(1);
-    }
-    if(n != size_data)
-    {
-        printf("The data value is incorrect");
-    }
-    else
-    {
-        size_t size_result;
-        char *string_data = convert_byte_to_char(data, size_data);
-        char *result = get_time(string_data, &size_result);
-        if(result == NULL)
+        if(val_recv == NULL)
         {
-            send_result_request(&csock, error_msg_get_time, sizeof(error_msg_get_time));
+            size_data += n;
+            val_recv = (uint8_t*) calloc(1, size_data);
+            if(val_recv == NULL)
+            {
+                return NULL;
+            }
+            while(n > 0)
+            {
+                val_recv[n - 1] = data[n - 1];
+                n--;
+            }
         }
-        send_result_request(&csock, result, size_result );
+        else{
+            int index;
+            size_data += n;
+            val_recv = (uint8_t*) realloc(val_recv, size_data);
+            for(index = 0; index < n; index++)
+            {
+                val_recv[size_data - n + index] = data[index];
+            }
+        }
+    }while(val_recv[size_data - 2] != 0xFF || val_recv[size_data - 1] != 0xFF);
 
-        free(string_data);
-    }
+    size_data -= 2;
+    char *format_date = convert_byte_to_char(val_recv, &size_data);
 
+    if(format_date == NULL)
+        return NULL;
+
+    char *result = get_time(format_date, &size_data);
+
+    send_result_request(&csock, result, size_data);
+
+    free(format_date);
     free(data);
     return NULL;
 }
 
 int send_result_request(const SOCKET* client_socket,const char *message, const size_t size_msg)
 {
-    if(send(*client_socket, &size_msg, sizeof(size_t), 0) == -1)
+    uint8_t *byte_message = calloc(sizeof(uint8_t), size_msg + 1);
+    int i;
+    for(i = 0; i < size_msg; i++)
     {
-        return -1;
+        byte_message[i] = message[i];
     }
-    if(send(*client_socket, message, size_msg, 0) == -1)
+    byte_message[size_msg - 1] = 0xFF;
+    byte_message[size_msg] = 0xFF;
+
+    if(send(*client_socket, byte_message, size_msg + 1, 0) == -1)
     {
         return -1;
     }
     return 0;
 }
 
-static char* convert_byte_to_char(const uint8_t* array_bytes, const size_t size)
+static char* convert_byte_to_char(const uint8_t* array_bytes, size_t *size)
 {
-    char *string = (char*)calloc(sizeof(size_t), size);
+    char *string = (char*)calloc(sizeof(size_t), *size);
     if(string == NULL)
     {
         return NULL;
     }
 
     size_t index;
-    for(index = 0; index < size; index++)
+    for(index = 0; index < *size; index++)
     {
-        string[index] = array_bytes[index];
+        char c = (char)array_bytes[index];
+        if(c >= 0 && c <= 127)
+        {
+            string[index] = (char)array_bytes[index];
+        }
+        else
+        {
+            return NULL;
+        }
+    }
+    if(string[*size - 1] != '\0')
+    {
+        *size += 1;
+        string = realloc(string, *size);
+        if(string == NULL)
+        {
+            return NULL;
+        }
+        string[*size - 1] = '\0';
     }
     return string;
 }
