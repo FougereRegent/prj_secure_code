@@ -10,7 +10,6 @@
 #define DEFAULT_PORT 8080
 
 static void init_cap();
-static int port_config_file();
 
 int main(int argc, char **argv)
 {
