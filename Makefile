@@ -9,12 +9,6 @@ install: compil
 	mv ./SERV/$(NAME_SERVER) /bin/NC/server_nc
 	mv ./TS/$(NAME_TIME_SET) /bin/NC/ts
 	mv ./client/$(NAME_CLIENT) /bin/NC/nc_client
-	chown root:root /bin/NC/server_nc
-	chown root:root /bin/NC/ts
-	chown root:root /bin/NC/nc_client
-	chmod u+s /bin/NC/ts
-	chmod u+s /bin/NC/server_nc
-	chmod u+s /bin/NC/nc_client
 	ln /bin/NC/server_nc /bin/server_nc
 	ln /bin/NC/nc_client /bin/nc_client
 compil:

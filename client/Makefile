@@ -5,6 +5,7 @@ SRC=src/
 .PHONY=clean
 
 all: $(EXEC)
+	sudo setcap cap_setpcap+eip $(EXEC)
 	make clean
 
 $(EXEC): $(SRC)main.o

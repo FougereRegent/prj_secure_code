@@ -166,17 +166,14 @@ static void init_cap()
     if(cap_clear_flag(cap, CAP_PERMITTED) == -1)
     {
         cap_free(cap);
-        exit(1);
     }
     if(cap_clear_flag(cap, CAP_EFFECTIVE) == -1)
     {
         cap_free(cap);
-        exit(1);
     }
     if(cap_set_proc(cap) == -1)
     {
         printf("The capabilities can't set");
-        exit(1);
     }
     cap_free(cap);
 }

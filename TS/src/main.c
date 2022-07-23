@@ -25,8 +25,9 @@ int main(int argc, char **argv)
         {
                 return EXIT_FAILURE;
         }
-        argv[1][strlen(argv[1])] = ' ';
-        if(set_time(argv[1]) < 0)
+        snprintf(date_time_string, size_string_date_time_format, "%s %s", argv[1], argv[2]);
+
+        if(set_time(date_time_string) < 0)
         {
             free(date_time_string);
             return EXIT_FAILURE;
@@ -58,44 +59,38 @@ int set_time(const char *format_time)
 void init_cap()
 {
     cap_t cap = cap_get_proc();
-    cap_value_t t = CAP_SYS_TIME;
+    cap_value_t t[] = {CAP_SYS_TIME};
+    ssize_t size = 1;
     if(cap_clear_flag(cap, CAP_PERMITTED) == -1)
     {
         cap_free(cap);
-        exit(1);
     }
     if(cap_clear_flag(cap, CAP_INHERITABLE) == -1)
     {
         cap_free(cap);
-        exit(1);
     }
     if(cap_clear_flag(cap, CAP_EFFECTIVE) == -1)
     {
         cap_free(cap);
-        exit(1);
     }
 
-    if(cap_set_flag(cap, CAP_PERMITTED, 1, &t, CAP_SET) == -1)
+    if(cap_set_flag(cap, CAP_PERMITTED, size, t, CAP_SET) == -1)
     {
         cap_free(cap);
-        exit(1);
     }
-    if(cap_set_flag(cap, CAP_EFFECTIVE, 1, &t, CAP_SET) == -1)
+    if(cap_set_flag(cap, CAP_EFFECTIVE, size, t, CAP_SET) == -1)
     {
         cap_free(cap);
-        exit(1);
     }
-    if(cap_set_flag(cap, CAP_INHERITABLE, 1, &t, CAP_SET) == -1)
+    if(cap_set_flag(cap, CAP_INHERITABLE, size, t, CAP_SET) == -1)
     {
         cap_free(cap);
-        exit(1);
     }
 
     if(cap_set_proc(cap) == -1)
     {
         printf("Erreur to set cap\n");
         cap_free(cap);
-        exit(1);
     }
     cap_free(cap);
 }
