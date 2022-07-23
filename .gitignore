@@ -54,3 +54,5 @@ dkms.conf
 
 #Own file to ignore
 /.my-credentials
+!/SERV/includes/config_file.h
+!/SERV/src/config_file.c
