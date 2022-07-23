@@ -9,6 +9,7 @@ static size_t nb_character_file(FILE *file);
 extern int port_config_file()
 {
     FILE *file = fopen("/etc/NC/config.ini", "r");
+    
     if(file == NULL)
     {
         return -1;
