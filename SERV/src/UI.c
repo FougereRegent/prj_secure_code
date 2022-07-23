@@ -9,9 +9,10 @@
 #include "treatment_time.h"
 
 /*Flags*/
-#define FLAG_DISPLAY_TIME 1
-#define FLAG_SET_TIME 2
-#define FLAG_QUIT_APP 3
+#define FLAG_DISPLAY_TIME_WITHOUT_ARGS 1
+#define FLAG_DISPLAY_TIME_WITH_ARGS 2
+#define FLAG_SET_TIME 3
+#define FLAG_QUIT_APP 4
 
 /*Prototype*/
 static int treatment_command(const char *command);
@@ -44,15 +45,34 @@ static int treatment_command(const char *command)
     {
         return -1;
     }
-    else if(regex_match(command, FLAG_DISPLAY_TIME) == 0)
+    else if(regex_match(command, FLAG_DISPLAY_TIME_WITHOUT_ARGS) == 0)
     {
-        const int size_format_time = strcmp(command, "time\n") == 0 ? 6 : strlen(command) - 4;
+        const int size_format_time = 6;
         char *format_time = (char*)calloc(sizeof(char), size_format_time);
         if(format_time == NULL)
         {
             return -1;
         }
-        snprintf(format_time, size_format_time, "%s", strcmp(command, "time\n") == 0 ? "%D %T" : command + 4);
+        snprintf(format_time, size_format_time, "%s", "%D %T");
+        now_time(format_time);
+
+        free(format_time);
+        return 0;
+    }
+    else if(regex_match(command, FLAG_DISPLAY_TIME_WITH_ARGS) == 0)
+    {
+        const int size_format_time = strlen(command) - 5;
+        if(size_format_time == 1) {
+            printf("There are no arguments\n");
+            return 0;
+        }
+        char *format_time = (char*)calloc(sizeof(char), size_format_time);
+
+        if(format_time == NULL)
+        {
+            return -1;
+        }
+        snprintf(format_time, size_format_time, "%s", command + 5);
         now_time(format_time);
 
         free(format_time);
@@ -86,8 +106,11 @@ static int regex_match(const char *command, const int flag) {
     int result = 0;
 
     switch (flag) {
-        case FLAG_DISPLAY_TIME:
-            result = regcomp(&regex, "^time\n", 0);
+        case FLAG_DISPLAY_TIME_WITHOUT_ARGS:
+            result = regcomp(&regex, "^time\n?$", REG_EXTENDED);
+            break;
+        case FLAG_DISPLAY_TIME_WITH_ARGS:
+            result = regcomp(&regex, "^time ", REG_EXTENDED);
             break;
         case FLAG_SET_TIME:
             result = regcomp(&regex, "^set ([0-2][0-9]|3[0-1])/(0[1-9]|1[0-2])/([1-2][0-9][0-9][0-9]) ([0-1][0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])\n?$", REG_EXTENDED);
