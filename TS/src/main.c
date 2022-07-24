@@ -8,14 +8,16 @@
 #include <string.h>
 #include <errno.h>
 
-int set_time(const char *format_time);
-int check_format_time(const char* format_time);
-void init_cap();
+static int set_time(const char *format_time);
+static int init_cap();
 
 
 int main(int argc, char **argv)
 {
-    init_cap();
+    if(init_cap() == -1)
+    {
+        printf("The capabilities can't set\n");
+    }
     if(argc == 3)
     {
         const size_t size_string_date_time_format = strlen(argv[1]) + strlen(argv[2]) + 2;
@@ -37,7 +39,7 @@ int main(int argc, char **argv)
     return EXIT_SUCCESS;
 }
 
-int set_time(const char *format_time)
+static int set_time(const char *format_time)
 {
     time_t now_time = time(NULL);
     struct tm *time = localtime(&now_time);
@@ -56,7 +58,7 @@ int set_time(const char *format_time)
     return -1;
 }
 
-void init_cap()
+static int init_cap()
 {
     cap_t cap = cap_get_proc();
     cap_value_t t[] = {CAP_SYS_TIME};
@@ -64,33 +66,35 @@ void init_cap()
     if(cap_clear_flag(cap, CAP_PERMITTED) == -1)
     {
         cap_free(cap);
+        return -1;
     }
     if(cap_clear_flag(cap, CAP_INHERITABLE) == -1)
     {
         cap_free(cap);
+        return -1;
     }
     if(cap_clear_flag(cap, CAP_EFFECTIVE) == -1)
     {
         cap_free(cap);
+        return -1;
     }
 
     if(cap_set_flag(cap, CAP_PERMITTED, size, t, CAP_SET) == -1)
     {
         cap_free(cap);
+        return -1;
     }
     if(cap_set_flag(cap, CAP_EFFECTIVE, size, t, CAP_SET) == -1)
     {
         cap_free(cap);
-    }
-    if(cap_set_flag(cap, CAP_INHERITABLE, size, t, CAP_SET) == -1)
-    {
-        cap_free(cap);
+        return -1;
     }
 
     if(cap_set_proc(cap) == -1)
     {
-        printf("Erreur to set cap\n");
         cap_free(cap);
+        return -1;
     }
     cap_free(cap);
+    return 0;
 }
