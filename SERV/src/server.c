@@ -8,7 +8,7 @@
 #include "server.h"
 #include "treatment_time.h"
 
-#define SIZE_BUFFER_DATA 2
+#define SIZE_BUFFER_DATA 16
 /*Prototypes*/
 static int send_result_request(const SOCKET* client_socket,const char *message, const size_t size_msg);
 static void *send_response(void *client_socket);
@@ -69,80 +69,61 @@ extern void *listen_request(void *listen_socket)
     }
 }
 
-static void *send_response(void *client_socket)
-{
+static void *send_response(void *client_socket) {
     size_t size_data = 0;
-    uint8_t *data = (uint8_t*) calloc(1, SIZE_BUFFER_DATA);
-    uint8_t *val_recv;
+    uint8_t *data = (uint8_t *) calloc(1, SIZE_BUFFER_DATA);
 
-    SOCKET csock = *((SOCKET*)client_socket);
+    SOCKET csock = *((SOCKET *) client_socket);
 
     int n = 0;
 
-    if(data == NULL)
-    {
+    if (data == NULL) {
         exit(1);
     }
 
-    do
-    {
-        if((n = recv(csock, data, SIZE_BUFFER_DATA, 0)) == -1)
-        {
-            free(data);
-            exit(1);
-        }
-        if(val_recv == NULL)
-        {
+    while (1) {
+        if ((n = recv(csock, data + size_data, SIZE_BUFFER_DATA, 0)) < 0) {
+            break;
+        } else {
             size_data += n;
-            val_recv = (uint8_t*) calloc(1, size_data);
-            if(val_recv == NULL)
-            {
+            data = realloc(data, size_data + SIZE_BUFFER_DATA);
+            if (data == NULL) {
                 return NULL;
-            }
-            while(n > 0)
-            {
-                val_recv[n - 1] = data[n - 1];
-                n--;
+
             }
         }
-        else{
-            int index;
-            size_data += n;
-            val_recv = (uint8_t*) realloc(val_recv, size_data);
-            for(index = 0; index < n; index++)
-            {
-                val_recv[size_data - n + index] = data[index];
-            }
+
+        if(data[size_data - 1] == 0x00)
+        {
+            break;
         }
-    }while(val_recv[size_data - 2] != 0xFF || val_recv[size_data - 1] != 0xFF);
+    }
 
-    size_data -= 2;
-    char *format_date = convert_byte_to_char(val_recv, &size_data);
+        char *format_date = convert_byte_to_char(data, &size_data);
 
-    if(format_date == NULL)
+        if (format_date == NULL)
+            return NULL;
+
+        char *result = get_time(format_date, &size_data);
+
+        send_result_request(&csock, result, size_data);
+
+        free(format_date);
+        free(data);
         return NULL;
-
-    char *result = get_time(format_date, &size_data);
-
-    send_result_request(&csock, result, size_data);
-
-    free(format_date);
-    free(data);
-    return NULL;
 }
+
 
 int send_result_request(const SOCKET* client_socket,const char *message, const size_t size_msg)
 {
-    uint8_t *byte_message = calloc(sizeof(uint8_t), size_msg + 1);
+    uint8_t *byte_message = calloc(sizeof(uint8_t), size_msg);
     int i;
     for(i = 0; i < size_msg; i++)
     {
         byte_message[i] = message[i];
     }
-    byte_message[size_msg - 1] = 0xFF;
-    byte_message[size_msg] = 0xFF;
-
-    if(send(*client_socket, byte_message, size_msg + 1, 0) == -1)
+    byte_message[size_msg - 1] = 0x00;
+    if(send(*client_socket, byte_message, size_msg, 0) == -1)
     {
         return -1;
     }

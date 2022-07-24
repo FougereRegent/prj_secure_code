@@ -6,8 +6,8 @@
 #include <netinet/in.h>
 #include<arpa/inet.h>
 
-#define LENGHT_ADDR_IP 17
-#define SIZE_BUFFER_DATA 2
+#define LENGHT_ADDR_IP 18
+#define SIZE_BUFFER_DATA 16
 
 typedef int SOCKET;
 typedef struct sockaddr_in SOCKADDR_IN;
@@ -31,7 +31,7 @@ int main(int argc, char **argv)
     }
     if(argc > 3)
     {
-        const size_t size_string_addr_ip = strlen(argv[1]) <= LENGHT_ADDR_IP ? strlen(argv[1]) : LENGHT_ADDR_IP;
+        const size_t size_string_addr_ip = strlen(argv[1]) <= LENGHT_ADDR_IP ? strlen(argv[1]) + 1 : LENGHT_ADDR_IP;
         size_t size_string_format_date = 0;
         int index;
 
@@ -48,8 +48,6 @@ int main(int argc, char **argv)
             argv[index - 1][strlen(argv[index - 1])] = ' ';
         }
 
-
-        addr_ip[LENGHT_ADDR_IP-1] = '\0';
 
         port = atoi(argv[2]);
         send_message(addr_ip, port, argv[3], size_string_format_date);
@@ -98,58 +96,39 @@ static int send_message(const char *addr_ip, const int port, const char *format,
     {
         test[i] = format[i];
     }
-    test[taille_msg - 1] = 0xFF;
-    test[taille_msg] = 0xFF;
-
+    test[taille_msg] = 0x00;
     if(send(sock, test, taille_msg + 1, 0) == - 1)
     {
         return -1;
     }
 
     size_t size_recv_data = 0;
-    uint8_t *data = (uint8_t*) malloc(size_recv_data);
-    uint8_t *val_recv;
+    uint8_t *data = (uint8_t*) calloc(1,size_recv_data);
     int n = 0;
 
-    do
-    {
-        if((n = recv(sock, data, SIZE_BUFFER_DATA, 0)) == -1)
-        {
-            free(data);
-            exit(1);
-        }
-        if(val_recv == NULL)
-        {
+    while (1) {
+        if ((n = recv(sock, data + size_recv_data, SIZE_BUFFER_DATA, 0)) < 0) {
+            break;
+        } else {
             size_recv_data += n;
-            val_recv = (uint8_t*) calloc(1, size_recv_data);
-            if(val_recv == NULL)
-            {
+            data = realloc(data, size_recv_data + SIZE_BUFFER_DATA);
+            if (data == NULL) {
                 return -1;
-            }
-            while(n > 0)
-            {
-                val_recv[n - 1] = data[n - 1];
-                n--;
+
             }
         }
-        else{
-            int index;
-            size_recv_data += n;
-            val_recv = (uint8_t*) realloc(val_recv, size_recv_data);
-            for(index = 0; index < n; index++)
-            {
-                val_recv[size_recv_data - n + index] = data[index];
-            }
+
+        if(data[size_recv_data - 1] == 0x00)
+        {
+            break;
         }
-    }while(val_recv[size_recv_data - 2] != 0xFF || val_recv[size_recv_data - 1] != 0xFF);
+    }
 
-    size_recv_data -= 2;
-
-    char *recv_data = convert_byte_to_char(val_recv, &size_recv_data);
+    char *recv_data = convert_byte_to_char(data, &size_recv_data);
 
     if(recv_data != NULL)
     {
-        printf("%s\n", recv_data);
+        fprintf(stdout,"%s\n", recv_data);
     }
     free(data);
     free(recv_data);
