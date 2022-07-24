@@ -59,7 +59,6 @@ static int treatment_command(const char *command)
             now_time(format_time);
 
             free(format_time);
-            return 0;
         }
         else
         {
